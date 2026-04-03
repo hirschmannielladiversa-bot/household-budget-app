@@ -1,0 +1,179 @@
+# 家計カテゴリ設定
+# このファイルを編集してカテゴリをカスタマイズできます
+
+categories:
+  食費:
+    icon: "🍽️"
+    subcategories:
+      - 食料品
+      - 外食
+      - コンビニ
+    ideal_ratio: 0.25  # 理想的な支出比率
+
+  交通費:
+    icon: "🚃"
+    subcategories:
+      - 電車
+      - バス
+      - タクシー
+      - ガソリン
+      - 駐車場
+    ideal_ratio: 0.05
+
+  医療費:
+    icon: "🏥"
+    subcategories:
+      - 病院
+      - 薬局
+      - 歯科
+    ideal_ratio: 0.05
+
+  通信費:
+    icon: "📱"
+    subcategories:
+      - 携帯電話
+      - インターネット
+      - サブスクリプション
+    ideal_ratio: 0.05
+
+  光熱費:
+    icon: "💡"
+    subcategories:
+      - 電気
+      - ガス
+      - 水道
+    ideal_ratio: 0.07
+
+  住居費:
+    icon: "🏠"
+    subcategories:
+      - 家賃
+      - 住宅ローン
+      - 管理費
+    ideal_ratio: 0.25
+
+  保険料:
+    icon: "🛡️"
+    subcategories:
+      - 生命保険
+      - 医療保険
+      - 自動車保険
+    ideal_ratio: 0.05
+
+  娯楽費:
+    icon: "🎮"
+    subcategories:
+      - 趣味
+      - 旅行
+      - 映画・音楽
+    ideal_ratio: 0.05
+
+  教育費:
+    icon: "📚"
+    subcategories:
+      - 学費
+      - 書籍
+      - 習い事
+    ideal_ratio: 0.05
+
+  日用品:
+    icon: "🧴"
+    subcategories:
+      - 消耗品
+      - 掃除用品
+      - 文房具
+    ideal_ratio: 0.03
+
+  衣服:
+    icon: "👕"
+    subcategories:
+      - 衣類
+      - 靴
+      - アクセサリー
+    ideal_ratio: 0.05
+
+  自己投資:
+    icon: "🌱"
+    subcategories:
+      - 書籍
+      - セミナー
+      - 資格取得
+      - オンライン学習
+    ideal_ratio: 0.05
+
+  投資:
+    icon: "📈"
+    subcategories:
+      - 株式
+      - 投資信託
+      - NISA
+      - iDeCo
+    ideal_ratio: 0.10
+
+  AI費:
+    icon: "🤖"
+    subcategories:
+      - ChatGPT
+      - Claude
+      - Gemini
+      - AIツール
+    ideal_ratio: 0.02
+
+  税金:
+    icon: "💴"
+    subcategories:
+      - 所得税
+      - 住民税
+      - 固定資産税
+    ideal_ratio: 0.00
+
+  ふるさと納税:
+    icon: "🏡"
+    subcategories:
+      - ふるさと納税
+    ideal_ratio: 0.00
+
+  車両費:
+    icon: "🚗"
+    subcategories:
+      - 車検
+      - 保険
+      - ガソリン
+    ideal_ratio: 0.00
+
+  その他:
+    icon: "📦"
+    subcategories:
+      - 雑費
+      - 交際費
+      - 寄付
+    ideal_ratio: 0.05
+
+# 貯蓄目標（収入に対する比率）
+savings_target: 0.20
+
+# 予算警告しきい値
+warning_threshold: 0.9  # 予算の90%を超えたら警告
+
+# カテゴリマッピング（外部データインポート用）
+category_mapping:
+  住居費: 住居費
+  通信費: 通信費
+  食費: 食費
+  "食費（Nash、スーパー）": 食費
+  保険料: 保険料
+  コンビニ: 食費
+  AI費: 通信費
+  サブスク: 娯楽費
+  アマゾン: 日用品
+  スターバックス: 食費
+  楽天PEY: その他
+  楽天PAY: その他
+  交通費: 交通費
+  その他: その他
+  医療費: 医療費
+  光熱費: 光熱費
+  娯楽費: 娯楽費
+  教育費: 教育費
+  日用品: 日用品
+  衣服: 衣服

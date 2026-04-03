@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>家計管理アプリ - 開発ログ（プロンプト履歴）</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Hiragino Sans', 'Noto Sans JP', sans-serif; background: #0d1117; color: #c9d1d9; line-height: 1.7; }
+  .header { background: linear-gradient(135deg, #161b22 0%, #0d1117 100%); border-bottom: 1px solid #30363d; padding: 40px 20px; text-align: center; }
+  .header h1 { font-size: 1.8em; color: #58a6ff; }
+  .header p { color: #8b949e; margin-top: 8px; }
+  .container { max-width: 960px; margin: 0 auto; padding: 20px; }
+  .phase { border: 1px solid #30363d; border-radius: 8px; margin: 20px 0; overflow: hidden; }
+  .phase-header { background: #161b22; padding: 16px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+  .phase-header:hover { background: #1c2128; }
+  .phase-header h2 { font-size: 1.2em; color: #58a6ff; }
+  .phase-date { color: #8b949e; font-size: 0.9em; }
+  .phase-body { padding: 20px; border-top: 1px solid #30363d; }
+  .prompt { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; margin: 12px 0; }
+  .prompt-label { color: #f78166; font-weight: bold; font-size: 0.85em; margin-bottom: 6px; }
+  .prompt-text { color: #e6edf3; font-size: 0.95em; }
+  .result { background: #0d1117; border-left: 3px solid #3fb950; padding: 12px 16px; margin: 8px 0; border-radius: 0 6px 6px 0; }
+  .result-label { color: #3fb950; font-weight: bold; font-size: 0.85em; margin-bottom: 4px; }
+  .result-text { color: #8b949e; font-size: 0.9em; }
+  .files { color: #d2a8ff; font-family: monospace; font-size: 0.85em; }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.75em; margin: 2px; }
+  .tag-new { background: #1f6feb33; color: #58a6ff; border: 1px solid #1f6feb; }
+  .tag-fix { background: #da3633aa; color: #f85149; border: 1px solid #da3633; }
+  .tag-security { background: #f0883e33; color: #f0883e; border: 1px solid #f0883e; }
+  .tag-feature { background: #3fb95033; color: #3fb950; border: 1px solid #3fb950; }
+  .summary { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 20px; margin: 20px 0; }
+  .summary h3 { color: #58a6ff; margin-bottom: 12px; }
+  .timeline { position: relative; padding-left: 24px; }
+  .timeline::before { content: ''; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: #30363d; }
+  .timeline-item { position: relative; margin: 16px 0; }
+  .timeline-item::before { content: ''; position: absolute; left: -20px; top: 6px; width: 12px; height: 12px; border-radius: 50%; background: #3fb950; border: 2px solid #0d1117; }
+  .note { color: #8b949e; font-style: italic; font-size: 0.9em; margin: 8px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  th { background: #161b22; color: #58a6ff; padding: 8px 12px; text-align: left; border: 1px solid #30363d; }
+  td { padding: 8px 12px; border: 1px solid #30363d; font-size: 0.9em; }
+  .footer { text-align: center; padding: 30px; color: #484f58; font-size: 0.85em; border-top: 1px solid #30363d; margin-top: 40px; }
+  details { margin: 8px 0; }
+  summary { cursor: pointer; color: #58a6ff; font-size: 0.95em; }
+  summary:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🏠 家計管理アプリ 開発ログ</h1>
+  <p>Claude Code によるプロンプト駆動開発の全記録</p>
+  <p style="margin-top:4px;font-size:0.85em;">Version 1.0 → 2.0.0 | 2026-03-07 〜 2026-04-03</p>
+</div>
+
+<div class="container">
+
+<!-- 概要 -->
+<div class="summary">
+  <h3>このドキュメントについて</h3>
+  <p>このアプリは <strong>Claude Code</strong>（AIプログラミングアシスタント）を使って、
+  自然言語のプロンプト（日本語の指示）だけで開発されました。
+  プログラミングの専門知識がなくても、やりたいことを伝えるだけでアプリが作れるという実例です。</p>
+  <p style="margin-top:8px;">以下は実際のプロンプト（指示）と、それによって何が作られたかの記録です。</p>
+</div>
+
+<!-- Phase 1-5: 初期開発 -->
+<div class="phase">
+  <div class="phase-header">
+    <h2>Phase 1〜5: プロジェクト基盤〜NotebookLM連携</h2>
+    <span class="phase-date">2026-03-07</span>
+  </div>
+  <div class="phase-body">
+    <p class="note">※ 初期開発は別セッションで行われたため、プロンプトの正確な記録は残っていません。Plans.mdとHANDOFF_TO_CURSOR.mdから再構成しています。</p>
+
+    <div class="prompt">
+      <div class="prompt-label">📝 推定プロンプト（Phase 1）</div>
+      <div class="prompt-text">NotebookLM（Google Sheets）と連携した家計管理・分析Streamlitアプリを作ってください。多角的グラフ分析とClaudeファイナンシャルプランナーによるアドバイス機能を持つものです。</div>
+    </div>
+    <div class="result">
+      <div class="result-label">✅ 作成されたもの</div>
+      <div class="result-text">
+        プロジェクト構造、requirements.txt、config/categories.yaml（カテゴリ設定）、data/sample_budget.csv（3ヶ月分サンプル）<br>
+        <span class="files">modules/data_loader.py, modules/analyzer.py, modules/visualizer.py</span>
+      </div>
+    </div>
+
+    <div class="prompt">
+      <div class="prompt-label">📝 推定プロンプト（Phase 3-4）</div>
+      <div class="prompt-text">Streamlitアプリ本体とAIアドバイス機能を実装。Claude API連携でファイナンシャルアドバイスを生成。</div>
+    </div>
+    <div class="result">
+      <div class="result-label">✅ 作成されたもの</div>
+      <div class="result-text">
+        <span class="files">app.py</span>（メインアプリ）、<span class="files">modules/advisor.py</span>（ルールベース診断 + Claude API）<br>
+        タブ構成: 概要 / グラフ / アドバイス の3タブ構成
+      </div>
+    </div>
+
+    <div class="prompt">
+      <div class="prompt-label">📝 推定プロンプト（Phase 5）</div>
+      <div class="prompt-text">Google Sheetsテンプレートと連携ガイドを作成。</div>
+    </div>
+    <div class="result">
+      <div class="result-label">✅ 作成されたもの</div>
+      <div class="result-text"><span class="files">templates/google_sheets_template.md</span></div>
+    </div>
+
+    <span class="tag tag-new">新規作成</span>
+    <span class="tag tag-feature">基盤構築</span>
+  </div>
+</div>
+
+<!-- Phase 6-9 -->
+<div class="phase">
+  <div class="phase-header">
+    <h2>Phase 6〜9: 資産管理・暗号化・レシート・月別インポート</h2>
+    <span class="phase-date">2026-03-11 〜 2026-03-18</span>
+  </div>
+  <div class="phase-body">
+    <p class="note">※ 複数セッションにわたる開発。Plans.mdから再構成。</p>
+
+    <div class="prompt">
+      <div class="prompt-label">📝 推定プロンプト（Phase 6）</div>
+      <div class="prompt-text">資産管理機能（車両・不動産の減価償却計算）と税金計算機能（所得税・住民税）を追加してください。</div>
+    </div>
+    <div class="result">
+      <div class="result-label">✅ 作成されたもの</div>
+      <div class="result-text">
+        <span class="files">modules/asset_manager.py, modules/tax_calculator.py, modules/asset_visualizer.py, config/assets.yaml</span><br>
+        資産管理タブ、税金計算タブを追加
+      </div>
+    </div>
+
+    <div class="prompt">
+      <div class="prompt-label">📝 推定プロンプト（Phase 7）</div>
+      <div class="prompt-text">資産データを暗号化して保存できるようにしてください。</div>
+    </div>
+    <div class="result">
+      <div class="result-label">✅ 作成されたもの</div>
+      <div class="result-text">
+        <span class="files">modules/crypto_manager.py</span>（PBKDF2 + Fernet暗号化）<br>
+        パスワード入力UI、暗号化保存/読込機能
+      </div>
+    </div>
+
+    <div class="prompt">
+      <div class="prompt-label">📝 推定プロンプト（Phase 8）</div>
+      <div class="prompt-text">レシートの写真からGemini APIで自動読み取りする機能を追加してください。</div>
+    </div>
+    <div class="result">
+      <div class="result-label">✅ 作成されたもの</div>
+      <div class="result-text">
+        <span class="files">modules/receipt_reader.py</span>（Gemini Vision API連携）<br>
+        画像アップロード → AI解析 → 日付/カテゴリ/金額を自動抽出
+      </div>
+    </div>
+
+    <div class="prompt">
+      <div class="prompt-label">📝 推定プロンプト（Phase 9）</div>
+      <div class="prompt-text">月別支出のExcelファイルをインポートする機能を追加。横形式のExcelから縦形式に変換。</div>
+    </div>
+    <div class="result">
+      <div class="result-label">✅ 作成されたもの</div>
+      <div class="result-text"><span class="files">modules/monthly_importer.py</span>、カテゴリ自動マッピング機能</div>
+    </div>
+
+    <span class="tag tag-new">新規作成</span>
+    <span class="tag tag-feature">機能拡張</span>
+  </div>
+</div>
+
+<!-- Phase 10: 本セッション -->
+<div class="phase">
+  <div class="phase-header">
+    <h2>Phase 10: 機能拡張・セキュリティ強化（本セッション記録）</h2>
+    <span class="phase-date">2026-03-30 〜 2026-04-03</span>
+  </div>
+  <div class="phase-body">
+    <p>以下は実際のプロンプトとClaude Codeの対応の記録です。</p>
+
+    <!-- 年度データ作成 -->
+    <div class="prompt">
+      <div class="prompt-label">📝 プロンプト #1</div>
+      <div class="prompt-text">3月から4月までをR何年度として、以下の年度を作成してください：R8年度、R9年度、R10年度、R4年度、R5年度</div>
+    </div>
+    <div class="result">
+      <div class="result-label">✅ 結果</div>
+      <div class="result-text">5年度分のサンプルデータ（各約800件）を生成。年度フィルタで将来年度も選択可能に修正。</div>
+    </div>
+
+    <div class="prompt">
+      <div class="prompt-label">📝 プロンプト #2</div>
+      <div class="prompt-text">2024年11月30日から2026年3月31日までしか取引の履歴は入れていないので、その他の取引は消してください</div>
+    </div>
+    <div class="result">
+      <div class="result-label">✅ 結果</div>
+      <div class="result-text">範囲外のサンプルデータを削除。実データのみ保持。</div>
+    </div>
+
+    <!-- カテゴリ修正の連続 -->
+    <div class="prompt">
+      <div class="prompt-label">📝 プロンプト #3〜#8（カテゴリ修正シリーズ）</div>
+      <div class="prompt-text">
+        ・CLAUDEはAI費に区分して、データ一覧でもAI費に統一してください<br>
+        ・ナッシュ、ﾅｯｼｭを食費に<br>
+        ・アンシンセイメイ、ジブラルタが交通費になっているので保険に<br>
+        ・ｶｸﾃｲｷﾖｼﾂｶｹｷﾝが交通費になっているので投資に分類<br>
+        ・本カード会員様利用分をデータ一覧から削除<br>
+        ・ﾊﾞﾛ-(AMIGO)は日用品に、ﾔﾂｸｽﾄﾞﾗﾂｸﾞ ｵ-ｸﾋﾞﾚを医療費に
+      </div>
+    </div>
+    <div class="result">
+      <div class="result-label">✅ 結果</div>
+      <div class="result-text">
+        saved_expenses.csv と transactions.csv の両方でカテゴリ修正。<br>
+        bank_formats.yaml のパターンも更新（GO→GOタクシー、AU→au ご利用、本→書籍 等、誤マッチ防止）。<br>
+        除外カテゴリをパターン先頭に移動し、楽天カード・ETCカード利用分が確実に除外されるように。
+      </div>
+    </div>
+    <span class="tag tag-fix">バグ修正</span>
+
+    <!-- データ一覧改善 -->
+    <div class="prompt">
+      <div class="prompt-label">📝 プロンプト #9</div>
+      <div class="prompt-text">データ一覧に削除機能も追加してください。</div>
+    </div>
+    <div class="result">
+      <div class="result-label">✅ 結果</div>
+      <div class="result-text">チェックボックス式の選択削除、メモ検索、カテゴリ絞り込み、表示リセットボタンを追加。</div>
+    </div>
+
+    <div class="prompt">
+      <div class="prompt-label">📝 プロンプト #10</div>
+      <div class="prompt-text">ふるさと納税カテゴリをデータ一覧につけてください</div>
+    </div>
+    <div class="result">
+      <div class="result-label">✅ 結果</div>
+      <div class="result-text">categories.yaml、bank_formats.yaml、app.pyに「ふるさと納税」カテゴリ追加。福岡県飯塚市等のデータを自動分類。</div>
+    </div>
+    <span class="tag tag-feature">機能追加</span>
+
+    <!-- 口座連携の問題 -->
+    <div class="prompt">
+      <div class="prompt-label">📝 プロンプト #11〜#14（口座連携カテゴリ同期）</div>
+      <div class="prompt-text">
+        生データのカテゴリと口座情報のカテゴリがマッチしていない。しっかりと両者をリンクさせてください。<br>
+        →（スクリーンショット付きで何度も指摘）
+      </div>
+    </div>
+    <div class="result">
+      <div class="result-label">✅ 結果</div>
+      <div class="result-text">
+        <strong>根本原因:</strong> CSVファイルを更新しても、Streamlitのsession_stateにキャッシュされた古いデータが表示されていた。<br>
+        <strong>対策:</strong><br>
+        ・BankManager起動時にreclassify_transactions(only_other=False)で全件再分類<br>
+        ・export_expenses_to_budgetで最新パターンによる再分類<br>
+        ・data_editorのキーをバージョン管理し、リセット時に確実に再生成<br>
+        ・表示リセットでファイルから再読み込み
+      </div>
+    </div>
+    <span class="tag tag-fix">バグ修正</span>
+
+    <!-- 生データ改善 -->
+    <div class="prompt">
+      <div class="prompt-label">📝 プロンプト #15</div>
+      <div class="prompt-text">生データプレビューを過去からではなく、最新の日付を上にして表示してください</div>
+    </div>
+    <div class="result">
+      <div class="result-label">✅ 結果</div>
+      <div class="result-text">データ一覧を降順（最新が上）に変更。保存時は日付順に戻して保存。</div>
+    </div>
+
+    <div class="prompt">
+      <div class="prompt-label">📝 プロンプト #16</div>
+      <div class="prompt-text">国税、地方税を税金カテゴリにしてください</div>
+    </div>
+    <div class="result">
+      <div class="result-label">✅ 結果</div>
+      <div class="result-text">「税」→「税金」にカテゴリ名統一。bank_formats.yamlのパターンも「税」(1文字)から「国税」「地方税」に具体化（「税引前利息」への誤マッチ防止）。categories.yamlに「税金」「車両費」追加。</div>
+    </div>
+
+    <!-- セキュリティ監査 -->
+    <div class="prompt">
+      <div class="prompt-label">📝 プロンプト #17（セキュリティ監査）</div>
+      <div class="prompt-text">このアプリケーションをデプロイする際に、以下の項目について監査エージェントを2体用意し、それぞれ別の観点から詳しくチェックしてください。<br>1. 問題となるセキュリティホールや、セキュリティ上の懸念点がないか<br>2. APIキーなどの機密情報をコード内に保存していないか</div>
+    </div>
+    <div class="result">
+      <div class="result-label">✅ 結果</div>
+      <div class="result-text">
+        2体の並行監査エージェントが17+10件の問題を検出。<br>
+        CRITICAL 6件、HIGH 7件、MEDIUM 6件、LOW 3件<br>
+        主要発見: エラーメッセージ{e}露出、.gitignore不完全、個人データGit混入、入力検証不足
+      </div>
+    </div>
+    <span class="tag tag-security">セキュリティ</span>
+
+    <div class="prompt">
+      <div class="prompt-label">📝 プロンプト #18（セキュリティ修正）</div>
+      <div class="prompt-text">現在挙げてもらった内容のセキュリティ関連の問題を、優先順位の高い順に並列エージェントを使って改善してください。</div>
+    </div>
+    <div class="result">
+      <div class="result-label">✅ 結果</div>
+      <div class="result-text">
+        3体の並列エージェントで一括修正:<br>
+        ・Agent 1: .gitignore完全化（個人データCSV/JSON除外）<br>
+        ・Agent 2: app.pyのエラーメッセージ13箇所汎用化、ファイルサイズ制限、XSS対策8箇所<br>
+        ・Agent 3: CSVインジェクション対策、URL検証、パスワード強度、金額バウンドチェック
+      </div>
+    </div>
+    <span class="tag tag-security">セキュリティ</span>
+
+    <!-- 収入管理 -->
+    <div class="prompt">
+      <div class="prompt-label">📝 プロンプト #19</div>
+      <div class="prompt-text">月別の収入を入力するタブと、収入と支出それぞれのグラフを並べてください。</div>
+    </div>
+    <div class="result">
+      <div class="result-label">✅ 結果</div>
+      <div class="result-text">
+        「💰 収入管理」タブ新設。月別収入入力テーブル、収入サマリー（総収入/月平均/入力済み月数）、収入vs支出棒グラフ（青/赤）、月別収支差額グラフ（黒字緑/赤字赤）。
+      </div>
+    </div>
+    <span class="tag tag-new">新規作成</span>
+
+    <!-- 口座連携→収入 -->
+    <div class="prompt">
+      <div class="prompt-label">📝 プロンプト #20</div>
+      <div class="prompt-text">口座と収入を連携し、以下の条件に当てはまるものを「収入」としてカテゴライズし、自動で収入の欄に入るようなスクリプトを書いてください。<br>1. 口座の収支がプラスになっているもの<br>2. 摘要欄に「給与」と記載されているもの</div>
+    </div>
+    <div class="result">
+      <div class="result-label">✅ 結果</div>
+      <div class="result-text">
+        transactions.csvからプラス金額＋「給与」含む取引を自動検出（NFKC正規化対応）。15ヶ月分の給与データを検出。プレビュー表示+ワンクリック反映ボタン。
+      </div>
+    </div>
+    <span class="tag tag-feature">機能追加</span>
+
+    <!-- ローン -->
+    <div class="prompt">
+      <div class="prompt-label">📝 プロンプト #21</div>
+      <div class="prompt-text">負債の部分にローンを追加。月別の引落し額と賞与月の引落し額を口座で指定できるようにする</div>
+    </div>
+    <div class="result">
+      <div class="result-label">✅ 結果</div>
+      <div class="result-text">
+        「🏠 ローン・負債」サブタブ新設。ローン名/借入額/残高/金利/月々返済/賞与月返済/賞与月指定/引落口座を管理。返済進捗バー表示。資産サマリーに純資産（総資産−ローン残高）を追加。
+      </div>
+    </div>
+    <span class="tag tag-new">新規作成</span>
+
+    <!-- 再監査 -->
+    <div class="prompt">
+      <div class="prompt-label">📝 プロンプト #22（セキュリティ再監査）</div>
+      <div class="prompt-text">再度セキュリティ関係の内容について再チェック。ダブルの監査エージェントで異なる視点からチェックし、基本的にはAPIキーを使用しない限り、すべてがローカル環境で完結するように設定。</div>
+    </div>
+    <div class="result">
+      <div class="result-label">✅ 結果</div>
+      <div class="result-text">
+        2体の再監査（防御側+攻撃側）。前回修正全項目FIXED確認。追加修正: ローン名HTMLエスケープ、プロファイル名パストラバーサル対策、unsafe_allow_html除去、asset_managerのJSON修正。ローカル完結性を確認。
+      </div>
+    </div>
+    <span class="tag tag-security">セキュリティ</span>
+
+    <!-- API漏洩対策 -->
+    <div class="prompt">
+      <div class="prompt-label">📝 プロンプト #23（API情報漏洩対策）</div>
+      <div class="prompt-text">APIキーを使用した場合にも、情報漏洩のリスクは最小化されているかどうかを検証してください。また、口座管理の中のPDF取り込みに関しても、口座の取引履歴の画像ファイルとPDFを両方、複数取り込めるようにしてください。</div>
+    </div>
+    <div class="result">
+      <div class="result-label">✅ 結果</div>
+      <div class="result-text">
+        <strong>API送信データ匿名化:</strong> 金額を万円単位に丸め、口座名・銀行名・保険会社名・資産銘柄名を送信しない。カテゴリ比率のみ送信。<br>
+        <strong>エラーメッセージ:</strong> advisor.py + bank_manager.pyの全APIエラー(20箇所以上)をlogger.error+汎用メッセージに置換。<br>
+        <strong>PDF/画像取り込み拡張:</strong> 全口座対応（銀行/カード自動判別）、PDF複数一括、画像(JPG/PNG)複数一括、Gemini Vision対応。
+      </div>
+    </div>
+    <span class="tag tag-security">セキュリティ</span>
+    <span class="tag tag-feature">機能追加</span>
+
+    <!-- ドキュメント -->
+    <div class="prompt">
+      <div class="prompt-label">📝 プロンプト #24</div>
+      <div class="prompt-text">使用方法ファイル、MDファイル、および Claude.md を更新してください。中学生でもわかるような簡単な使用方法と入力方法を、HTML形式で作成してください。</div>
+    </div>
+    <div class="result">
+      <div class="result-label">✅ 結果</div>
+      <div class="result-text">
+        CLAUDE.md v2.0.0更新、Plans.md Phase10追加、templates/usage_guide.html新規作成（11セクション、APIキー詳細ガイド含む）。ダブルクリック起動用の「家計アプリ起動.command」も作成。
+      </div>
+    </div>
+    <span class="tag tag-new">新規作成</span>
+
+    <div class="prompt">
+      <div class="prompt-label">📝 プロンプト #25</div>
+      <div class="prompt-text">使い方ガイドに、カテゴリーがうまく調整されない場合はClaude Code等を使って「〇〇という字を含むものは〇〇費にカテゴライズしてください」と言えば編集してくれます、と書き込んでください。セキュリティを再度見直してチェックするということも注意書きに。</div>
+    </div>
+    <div class="result">
+      <div class="result-label">✅ 結果</div>
+      <div class="result-text">
+        セクション10「アプリのカスタマイズ（Claude Code）」追加。カテゴリ修正の具体例、使いにくい部分の改善例、セキュリティチェック2ステップの注意書き。
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 統計 -->
+<div class="summary">
+  <h3>📊 開発統計</h3>
+  <table>
+    <tr><th>項目</th><th>数値</th></tr>
+    <tr><td>開発期間</td><td>2026-03-07 〜 2026-04-03（約1ヶ月）</td></tr>
+    <tr><td>フェーズ数</td><td>10フェーズ</td></tr>
+    <tr><td>本セッションのプロンプト数</td><td>約25回</td></tr>
+    <tr><td>セキュリティ監査回数</td><td>4回（初回2体 + 修正後2体 + API検証1体）</td></tr>
+    <tr><td>並列エージェント使用回数</td><td>5回（監査2回 + 修正1回 + 再監査1回 + ドキュメント1回）</td></tr>
+    <tr><td>メインタブ数</td><td>8タブ</td></tr>
+    <tr><td>サブタブ数</td><td>19サブタブ</td></tr>
+    <tr><td>Pythonモジュール数</td><td>12ファイル</td></tr>
+    <tr><td>修正したカテゴリ分類パターン</td><td>50以上</td></tr>
+  </table>
+</div>
+
+<!-- 学んだこと -->
+<div class="summary">
+  <h3>💡 この開発から学べること</h3>
+  <div class="timeline">
+    <div class="timeline-item">
+      <strong>プログラミング知識ゼロでもアプリが作れる</strong>
+      <p style="color:#8b949e;">「〇〇を食費にして」「ローン管理を追加して」のような日本語だけで機能が実装された。</p>
+    </div>
+    <div class="timeline-item">
+      <strong>スクリーンショットが最強のバグ報告</strong>
+      <p style="color:#8b949e;">「カテゴリが変わっていません」+スクリーンショットの組み合わせで、Claude Codeは問題を即座に特定できた。</p>
+    </div>
+    <div class="timeline-item">
+      <strong>セキュリティは後からでも対応できる</strong>
+      <p style="color:#8b949e;">まず機能を作り、監査エージェントで問題を洗い出し、並列エージェントで一括修正するフローが効率的だった。</p>
+    </div>
+    <div class="timeline-item">
+      <strong>並列エージェントで作業速度が3倍に</strong>
+      <p style="color:#8b949e;">セキュリティ修正を3体のエージェントに分担し、ファイル所有権を分けることで衝突なく並行作業できた。</p>
+    </div>
+    <div class="timeline-item">
+      <strong>キャッシュ問題は根気よく対処</strong>
+      <p style="color:#8b949e;">CSVを書き換えてもStreamlitのsession_stateに古いデータが残る問題は、何度もやり取りして解決。「ブラウザをリロード」が最終手段。</p>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div class="footer">
+  🏠 家計管理ダッシュボード v2.0.0 開発ログ | 生成日: 2026-04-03<br>
+  このドキュメントは Claude Code (Opus 4.6) によって作成されました
+</div>
+
+</body>
+</html>

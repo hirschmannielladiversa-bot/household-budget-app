@@ -1,0 +1,11 @@
+asset_id,asset_type,name,purchase_date,purchase_price,current_value,details
+A001,vehicle,プリウス,2022-03-15,3200000,2800000,"{""cc"": 1800, ""weight_kg"": 1400, ""color"": ""白"", ""model_year"": 2022}"
+A002,vehicle,N-BOX,2023-06-20,1850000,1650000,"{""cc"": 660, ""weight_kg"": 900, ""color"": ""シルバー"", ""model_year"": 2023}"
+A003,financial,普通預金,2020-01-01,1500000,1500000,"{""bank"": ""三菱UFJ銀行"", ""account_type"": ""普通"", ""branch"": ""渋谷支店""}"
+A004,financial,定期預金,2023-04-01,3000000,3015000,"{""bank"": ""みずほ銀行"", ""account_type"": ""定期"", ""interest_rate"": 0.5, ""maturity_date"": ""2024-04-01""}"
+A005,financial,eMAXIS Slim 米国株式(S&P500),2021-08-10,2000000,2850000,"{""fund_name"": ""eMAXIS Slim"", ""units"": 500, ""fund_type"": ""投資信託"", ""category"": ""米国株式""}"
+A006,financial,トヨタ自動車株式,2022-01-20,280000,320000,"{""ticker"": ""7203"", ""shares"": 100, ""exchange"": ""東証プライム"", ""sector"": ""自動車""}"
+A007,financial,楽天・全世界株式インデックス・ファンド,2022-05-15,1500000,1780000,"{""fund_name"": ""楽天VT"", ""units"": 800, ""fund_type"": ""投資信託"", ""category"": ""全世界株式""}"
+A008,real_estate,自宅マンション,2018-09-01,45000000,42000000,"{""type"": ""RC造"", ""area_m2"": 75, ""address"": ""東京都千代田区サンプル町1-1"", ""floor"": 8, ""rooms"": ""3LDK""}"
+A009,real_estate,投資用ワンルーム,2020-11-15,18000000,17500000,"{""type"": ""RC造"", ""area_m2"": 25, ""address"": ""東京都中央区サンプル町2-2"", ""floor"": 12, ""rooms"": ""1K"", ""monthly_rent"": 95000}"
+A010,vehicle,電動アシスト自転車,2024-01-10,180000,160000,"{""brand"": ""パナソニック"", ""model"": ""ビビDX"", ""battery_capacity"": ""16Ah"", ""color"": ""ネイビー""}"

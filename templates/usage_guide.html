@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>家計管理ダッシュボード - 使い方ガイド</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif; background: #f5f7fa; color: #333; line-height: 1.8; }
+  .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 20px; text-align: center; }
+  .header h1 { font-size: 2em; margin-bottom: 8px; }
+  .header p { font-size: 1.1em; opacity: 0.9; }
+  .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+  .toc { background: white; border-radius: 12px; padding: 24px; margin: 20px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .toc h2 { font-size: 1.3em; margin-bottom: 12px; color: #667eea; }
+  .toc ul { list-style: none; padding: 0; }
+  .toc li { padding: 6px 0; }
+  .toc a { color: #555; text-decoration: none; font-size: 1.05em; }
+  .toc a:hover { color: #667eea; }
+  .section { background: white; border-radius: 12px; padding: 28px; margin: 24px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .section h2 { font-size: 1.4em; color: #333; border-bottom: 3px solid #667eea; padding-bottom: 8px; margin-bottom: 16px; }
+  .section h3 { font-size: 1.15em; color: #555; margin: 16px 0 8px; }
+  .step { background: #f8f9ff; border-left: 4px solid #667eea; padding: 16px; margin: 12px 0; border-radius: 0 8px 8px 0; }
+  .step-number { display: inline-block; background: #667eea; color: white; width: 28px; height: 28px; border-radius: 50%; text-align: center; line-height: 28px; font-weight: bold; margin-right: 8px; font-size: 0.9em; }
+  .tip { background: #fff8e1; border-left: 4px solid #ffc107; padding: 12px 16px; margin: 12px 0; border-radius: 0 8px 8px 0; }
+  .tip::before { content: "💡 "; }
+  .warning { background: #ffeef0; border-left: 4px solid #ff5252; padding: 12px 16px; margin: 12px 0; border-radius: 0 8px 8px 0; }
+  .warning::before { content: "⚠️ "; }
+  .code { background: #2d2d2d; color: #f8f8f2; padding: 16px; border-radius: 8px; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.95em; overflow-x: auto; margin: 12px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  th { background: #667eea; color: white; padding: 10px 12px; text-align: left; font-size: 0.95em; }
+  td { padding: 10px 12px; border-bottom: 1px solid #eee; font-size: 0.95em; }
+  tr:hover { background: #f8f9ff; }
+  .tab-badge { display: inline-block; background: #667eea; color: white; padding: 2px 10px; border-radius: 12px; font-size: 0.85em; margin: 2px; }
+  .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin: 16px 0; }
+  .feature-card { background: #f8f9ff; border-radius: 8px; padding: 16px; text-align: center; }
+  .feature-card .icon { font-size: 2em; margin-bottom: 8px; }
+  .feature-card h4 { color: #667eea; margin-bottom: 4px; }
+  .footer { text-align: center; padding: 30px; color: #999; font-size: 0.9em; }
+  @media (max-width: 600px) {
+    .header h1 { font-size: 1.4em; }
+    .section { padding: 16px; }
+    .feature-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🏠 家計管理ダッシュボード</h1>
+  <p>使い方ガイド（バージョン 2.0.0）</p>
+</div>
+
+<div class="container">
+
+<!-- 目次 -->
+<div class="toc">
+  <h2>📖 もくじ</h2>
+  <ul>
+    <li><a href="#start">1. アプリを起動する</a></li>
+    <li><a href="#input">2. データを入力する（3つの方法）</a></li>
+    <li><a href="#tabs">3. 各タブの使い方</a></li>
+    <li><a href="#income">4. 収入を入力する</a></li>
+    <li><a href="#bank">5. 口座管理を使う</a></li>
+    <li><a href="#loan">6. ローンを登録する</a></li>
+    <li><a href="#ai">7. AIアドバイスを使う（オプション）</a></li>
+    <li><a href="#security">8. セキュリティについて</a></li>
+    <li><a href="#faq">9. よくある質問</a></li>
+    <li><a href="#claudecode">10. アプリのカスタマイズ（Claude Code）</a></li>
+    <li><a href="#apikey">11. APIキーって何？（くわしい説明）</a></li>
+  </ul>
+</div>
+
+<!-- 1. 起動 -->
+<div class="section" id="start">
+  <h2>1. アプリを起動する</h2>
+  <p>アプリの起動はとてもかんたんです。<strong>ファイルをダブルクリックするだけ</strong>です。</p>
+
+  <h3 style="color:#667eea;">おすすめ：ダブルクリックで起動</h3>
+  <div class="step" style="background:#e8f5e9;border-left-color:#4CAF50;">
+    <span class="step-number" style="background:#4CAF50;">1</span> アプリのフォルダを開く<br>
+    <span class="step-number" style="background:#4CAF50;">2</span> <strong>「家計アプリ起動.command」</strong>をダブルクリック<br>
+    <span class="step-number" style="background:#4CAF50;">3</span> 黒い画面（ターミナル）が出て、自動でブラウザが開きます<br>
+    <span class="step-number" style="background:#4CAF50;">4</span> ブラウザに家計ダッシュボードが表示されたら準備完了！
+  </div>
+
+  <div class="tip">初回のみ、必要なソフトが自動でインストールされます（少し時間がかかります）。</div>
+
+  <div class="warning">
+    初めてダブルクリックした時に「開発元が未確認のため開けません」と出たら：<br>
+    → ファイルを<strong>右クリック</strong> →「開く」→「開く」をクリックしてください（初回のみ）。
+  </div>
+
+  <h3>終了するには</h3>
+  <p>起動時に表示された黒い画面（ターミナル）を<strong>閉じる</strong>か、<code>Ctrl + C</code> を押すとアプリが終了します。</p>
+
+  <h3 style="color:#999;margin-top:24px;">上級者向け：ターミナルから起動</h3>
+  <details style="margin:8px 0;">
+    <summary style="cursor:pointer;color:#999;">ターミナルコマンドを表示（クリックで展開）</summary>
+    <div class="code" style="margin-top:8px;">
+      cd "/Volumes/tkg SSD/household-budget-app"<br>
+      pip install -r requirements.txt  # 初回のみ<br>
+      python3 -m streamlit run app.py
+    </div>
+  </details>
+</div>
+
+<!-- 2. データ入力 -->
+<div class="section" id="input">
+  <h2>2. データを入力する（3つの方法）</h2>
+  <p>家計データの入力方法は3つあります。自分に合った方法を選んでください。</p>
+
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="icon">📁</div>
+      <h4>方法1：ファイルアップロード</h4>
+      <p>CSVファイルやExcelファイルをアップロード</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">✏️</div>
+      <h4>方法2：手動入力</h4>
+      <p>サイドバーで1件ずつ入力</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">🏦</div>
+      <h4>方法3：口座CSV取り込み</h4>
+      <p>銀行やカードのCSVを取り込み</p>
+    </div>
+  </div>
+
+  <h3>方法1：ファイルアップロード</h3>
+  <div class="step">
+    <span class="step-number">1</span> 左のサイドバーにある「📁 ファイルアップロード」にCSVまたはExcelファイルをドラッグ＆ドロップ<br>
+    <span class="step-number">2</span> ファイルの形式はこの4列です：
+  </div>
+  <table>
+    <tr><th>列名</th><th>内容</th><th>例</th></tr>
+    <tr><td>日付</td><td>支出した日（YYYY-MM-DD形式）</td><td>2026-04-01</td></tr>
+    <tr><td>カテゴリ</td><td>支出の種類</td><td>食費</td></tr>
+    <tr><td>金額</td><td>支払った金額（数字のみ）</td><td>3500</td></tr>
+    <tr><td>メモ</td><td>何に使ったか（自由記入）</td><td>スーパー買い物</td></tr>
+  </table>
+
+  <h3>方法2：手動入力</h3>
+  <div class="step">
+    <span class="step-number">1</span> サイドバーの「✏️ 手動入力」を開く<br>
+    <span class="step-number">2</span> 日付・カテゴリ・金額・メモを入力<br>
+    <span class="step-number">3</span>「追加」ボタンを押す
+  </div>
+
+  <h3>方法3：口座CSV取り込み</h3>
+  <div class="step">
+    <span class="step-number">1</span>「💳 口座管理」タブを開く<br>
+    <span class="step-number">2</span>「➕ 口座追加」で銀行口座やカードを登録<br>
+    <span class="step-number">3</span>「📥 CSV取り込み」で銀行からダウンロードしたCSVを取り込み<br>
+    <span class="step-number">4</span>「📤 家計へ連携」で家計データに反映
+  </div>
+
+  <div class="tip">データは「💾 保存」ボタンで保存されます。次回起動時に自動で読み込まれます。</div>
+</div>
+
+<!-- 3. タブ -->
+<div class="section" id="tabs">
+  <h2>3. 各タブの使い方</h2>
+  <p>画面上部の8つのタブで、さまざまな機能を使えます。</p>
+
+  <table>
+    <tr><th>タブ</th><th>できること</th></tr>
+    <tr>
+      <td><span class="tab-badge">📋 概要</span></td>
+      <td>収支サマリー、カテゴリ別支出の円グラフ、月別の収支を一目で確認</td>
+    </tr>
+    <tr>
+      <td><span class="tab-badge">📈 グラフ</span></td>
+      <td>月別支出推移（棒グラフ）、日別推移（折れ線）、予算ゲージなど</td>
+    </tr>
+    <tr>
+      <td><span class="tab-badge">💰 収入管理</span></td>
+      <td>月別の収入入力、口座からの給与自動検出、収入vs支出の比較グラフ</td>
+    </tr>
+    <tr>
+      <td><span class="tab-badge">🧭 アドバイス</span></td>
+      <td>AIファイナンシャルプランナーが家計を診断（APIキーが必要）</td>
+    </tr>
+    <tr>
+      <td><span class="tab-badge">🏦 資産管理</span></td>
+      <td>預貯金・金融資産・保険・ローンの一元管理、資産構成グラフ</td>
+    </tr>
+    <tr>
+      <td><span class="tab-badge">💴 税金・年末調整</span></td>
+      <td>所得税・住民税計算、年末調整シミュレーション、ふるさと納税</td>
+    </tr>
+    <tr>
+      <td><span class="tab-badge">💳 口座管理</span></td>
+      <td>銀行CSV取り込み、PDF/画像の明細取り込み、取引履歴の管理</td>
+    </tr>
+    <tr>
+      <td><span class="tab-badge">📄 データ一覧</span></td>
+      <td>全支出データの閲覧・検索・編集・削除</td>
+    </tr>
+  </table>
+</div>
+
+<!-- 4. 収入 -->
+<div class="section" id="income">
+  <h2>4. 収入を入力する</h2>
+
+  <h3>手動で入力する場合</h3>
+  <div class="step">
+    <span class="step-number">1</span>「💰 収入管理」タブを開く<br>
+    <span class="step-number">2</span> 月ごとの「収入（円）」欄に金額を入力<br>
+    <span class="step-number">3</span>「💾 収入データを保存」をクリック
+  </div>
+
+  <h3>口座から自動で取得する場合</h3>
+  <div class="step">
+    <span class="step-number">1</span> まず「💳 口座管理」で銀行CSVを取り込む<br>
+    <span class="step-number">2</span>「💰 収入管理」タブを開く<br>
+    <span class="step-number">3</span>「🔗 口座から給与データを検出」が表示される<br>
+    <span class="step-number">4</span>「📥 検出した給与データを収入に反映」をクリック
+  </div>
+
+  <div class="tip">給与として検出されるのは、金額がプラスで摘要に「給与」と書かれた取引です。</div>
+</div>
+
+<!-- 5. 口座管理 -->
+<div class="section" id="bank">
+  <h2>5. 口座管理を使う</h2>
+
+  <h3>口座を追加する</h3>
+  <div class="step">
+    <span class="step-number">1</span>「💳 口座管理」→「➕ 口座追加」タブ<br>
+    <span class="step-number">2</span> 口座の種類（銀行/証券/カード）を選ぶ<br>
+    <span class="step-number">3</span> 口座名・銀行名・初期残高を入力<br>
+    <span class="step-number">4</span>「追加」ボタンを押す
+  </div>
+
+  <h3>CSV取り込み</h3>
+  <div class="step">
+    <span class="step-number">1</span>「📥 CSV取り込み」タブ<br>
+    <span class="step-number">2</span> 取り込み先の口座を選ぶ<br>
+    <span class="step-number">3</span> 銀行のCSVフォーマットを選ぶ（三菱UFJ、楽天銀行など）<br>
+    <span class="step-number">4</span> CSVファイルをアップロード
+  </div>
+
+  <h3>PDF・画像取り込み（Gemini API必要）</h3>
+  <div class="step">
+    <span class="step-number">1</span>「📄 PDF・画像取り込み」タブ<br>
+    <span class="step-number">2</span> 取り込み先の口座を選ぶ<br>
+    <span class="step-number">3</span>「📄 PDF取り込み」または「🖼️ 画像取り込み」を選ぶ<br>
+    <span class="step-number">4</span> ファイルをアップロード（複数可）<br>
+    <span class="step-number">5</span>「🔍 解析してインポート」をクリック
+  </div>
+
+  <div class="warning">PDF・画像取り込みにはGemini APIキーが必要です。サイドバーで設定してください。</div>
+</div>
+
+<!-- 6. ローン -->
+<div class="section" id="loan">
+  <h2>6. ローンを登録する</h2>
+  <div class="step">
+    <span class="step-number">1</span>「🏦 資産管理」タブ →「🏠 ローン・負債」サブタブ<br>
+    <span class="step-number">2</span>「➕ ローンを追加」フォームに入力：
+  </div>
+  <table>
+    <tr><th>項目</th><th>説明</th><th>例</th></tr>
+    <tr><td>ローン名</td><td>ローンの名前</td><td>住宅ローン</td></tr>
+    <tr><td>借入額</td><td>最初に借りた金額</td><td>35,000,000</td></tr>
+    <tr><td>現在の残高</td><td>今残っている金額</td><td>28,000,000</td></tr>
+    <tr><td>金利</td><td>年利（%）</td><td>0.50</td></tr>
+    <tr><td>月々の返済額</td><td>毎月の引落し額</td><td>85,000</td></tr>
+    <tr><td>賞与月の返済額</td><td>ボーナス月の追加引落し</td><td>200,000</td></tr>
+    <tr><td>賞与月</td><td>ボーナス月を選択</td><td>6月、12月</td></tr>
+    <tr><td>引落口座</td><td>返済が引き落とされる口座</td><td>ろうきん</td></tr>
+  </table>
+  <div class="tip">登録すると「資産サマリー」に純資産（総資産 − ローン残高）が表示されます。</div>
+</div>
+
+<!-- 7. AI -->
+<div class="section" id="ai">
+  <h2>7. AIアドバイスを使う（オプション）</h2>
+  <p>AI機能は<strong>なくても</strong>アプリの全基本機能が使えます。AI機能を使いたい場合のみ設定してください。</p>
+
+  <table>
+    <tr><th>AI機能</th><th>必要なAPIキー</th><th>できること</th></tr>
+    <tr><td>家計アドバイス</td><td>Claude API または Gemini API</td><td>家計の診断とアクションプラン</td></tr>
+    <tr><td>チャット相談</td><td>Claude API または Gemini API</td><td>対話形式で家計相談</td></tr>
+    <tr><td>レシート読み取り</td><td>Gemini API</td><td>レシート写真から自動入力</td></tr>
+    <tr><td>PDF/画像取り込み</td><td>Gemini API</td><td>明細PDF・画像から取引取り込み</td></tr>
+  </table>
+
+  <h3>設定方法</h3>
+  <div class="step">
+    <span class="step-number">1</span> サイドバーの「🤖 AI アドバイス」セクション<br>
+    <span class="step-number">2</span> APIキーを入力欄に貼り付け<br>
+    <span class="step-number">3</span>「Claudeによる自然文アドバイスを有効化」にチェック
+  </div>
+
+  <div class="warning">APIキーは外部に漏らさないように注意してください。APIキーは画面には表示されません（●●●で隠されます）。</div>
+  <div class="tip">APIキーなしでも「ルールベース診断」（AIを使わない簡易分析）は使えます。</div>
+</div>
+
+<!-- 8. セキュリティ -->
+<div class="section" id="security">
+  <h2>8. セキュリティについて</h2>
+  <p>このアプリはあなたの大切なお金の情報を扱います。以下の仕組みで安全に守っています。</p>
+
+  <table>
+    <tr><th>保護項目</th><th>対策内容</th></tr>
+    <tr><td>データの保存場所</td><td>すべてあなたのパソコン内のみ。クラウドには送信しません。</td></tr>
+    <tr><td>AI使用時のデータ</td><td>金額は概算に丸め、口座名や保険会社名は送信しません。</td></tr>
+    <tr><td>APIキー</td><td>画面に表示されず、ブラウザを閉じると消えます。</td></tr>
+    <tr><td>エラー表示</td><td>内部の技術情報は表示せず、わかりやすいメッセージのみ表示します。</td></tr>
+    <tr><td>Git管理</td><td>個人の金融データは.gitignoreで除外されています。</td></tr>
+    <tr><td>資産データ</td><td>パスワードで暗号化して保存できます。</td></tr>
+  </table>
+
+  <div class="tip">AI機能を使わなければ、すべての処理がパソコン内で完結します。インターネット不要です。</div>
+</div>
+
+<!-- 9. FAQ -->
+<div class="section" id="faq">
+  <h2>9. よくある質問</h2>
+
+  <h3>Q. データが表示されません</h3>
+  <p>→ サイドバーでCSVファイルをアップロードするか、「サンプルデータを読み込む」ボタンを押してみてください。</p>
+
+  <h3>Q. カテゴリを変更したい</h3>
+  <p>→「📄 データ一覧」タブで、カテゴリ欄をクリックするとドロップダウンで変更できます。変更後「💾 変更を保存」を押してください。</p>
+
+  <h3>Q. データを間違えて入力した</h3>
+  <p>→「📄 データ一覧」タブで該当行の「🗑️」にチェック → 「選択削除」ボタンで削除できます。</p>
+
+  <h3>Q. 画面の表示がおかしい</h3>
+  <p>→ ブラウザで <code>Ctrl + R</code>（Mac: <code>Cmd + R</code>）でページをリロードしてください。</p>
+
+  <h3>Q. 口座のカテゴリが間違っている</h3>
+  <p>→「💳 口座管理」→「📋 取引履歴」→「🔄 カテゴリ再分類」ボタンを押すと、最新のルールで全件再分類されます。</p>
+
+  <h3>Q. PDF取り込みで「APIキーの利用制限」と出る</h3>
+  <p>→ Gemini APIの無料枠の上限に達しています。少し時間を空けて再試行するか、有料プランに切り替えてください。</p>
+</div>
+
+<!-- カテゴリ一覧 -->
+<div class="section">
+  <h2>📋 カテゴリ一覧</h2>
+  <p>支出は以下のカテゴリに自動分類されます。</p>
+  <table>
+    <tr><th>カテゴリ</th><th>含まれるもの（例）</th></tr>
+    <tr><td>食費</td><td>スーパー、コンビニ、外食、ATM出金</td></tr>
+    <tr><td>交通費</td><td>ETC、ガソリン、電車、バス</td></tr>
+    <tr><td>住居費</td><td>家賃、管理費</td></tr>
+    <tr><td>光熱費</td><td>電気、ガス、水道</td></tr>
+    <tr><td>通信費</td><td>携帯電話、NHK、Apple</td></tr>
+    <tr><td>医療費</td><td>病院、薬局、ドラッグストア</td></tr>
+    <tr><td>保険料</td><td>生命保険、ジブラルタ、アンシンセイメイ</td></tr>
+    <tr><td>娯楽費</td><td>Amazon、Netflix、旅行</td></tr>
+    <tr><td>日用品</td><td>ニトリ、ダイソー、バロー</td></tr>
+    <tr><td>衣服</td><td>ユニクロ、美容院</td></tr>
+    <tr><td>AI費</td><td>Claude、ChatGPT、Microsoft、Midjourney</td></tr>
+    <tr><td>投資</td><td>確定拠出年金、iDeCo、NISA</td></tr>
+    <tr><td>税金</td><td>国税、地方税、所得税、住民税</td></tr>
+    <tr><td>ふるさと納税</td><td>各自治体への寄付</td></tr>
+    <tr><td>車両費</td><td>車検、オートバックス</td></tr>
+    <tr><td>教育費</td><td>学費、書籍、オンライン講座</td></tr>
+    <tr><td>その他</td><td>振込手数料、分類できないもの</td></tr>
+  </table>
+</div>
+
+</div>
+
+<!-- 10. Claude Codeでカスタマイズ -->
+<div class="section" id="claudecode">
+  <h2>10. アプリのカスタマイズ（Claude Code）</h2>
+  <p>このアプリは <strong>Claude Code</strong>（AIプログラミングアシスタント）を使って、
+  かんたんにカスタマイズできます。プログラミングの知識は必要ありません。
+  日本語でやりたいことを伝えるだけで、Claude Codeがコードを編集してくれます。</p>
+
+  <h3>カテゴリ分類がうまくいかない場合</h3>
+  <p>たとえば「スターバックス」が食費ではなく娯楽費に分類されてしまう場合、
+  Claude Codeに以下のようにお願いするだけでOKです。</p>
+
+  <div style="background:#1e1e1e;color:#d4d4d4;border-radius:8px;padding:16px;margin:12px 0;font-family:monospace;">
+    <span style="color:#569cd6;">あなた：</span><br>
+    「スターバックス」という字を含むものは食費にカテゴライズしてください<br><br>
+    <span style="color:#569cd6;">あなた：</span><br>
+    「ENEOS」を含む取引を交通費に分類してください<br><br>
+    <span style="color:#569cd6;">あなた：</span><br>
+    「Netflix」と「Disney」は娯楽費にしてください
+  </div>
+
+  <div class="tip">Claude Codeは <code>config/bank_formats.yaml</code> というファイルを編集して、カテゴリ分類のルールを自動で更新してくれます。</div>
+
+  <h3>使いにくい部分を改善したい場合</h3>
+  <p>「ここが使いにくい」「こういう機能がほしい」と思ったら、
+  そのまま Claude Code に伝えてください。</p>
+
+  <div style="background:#1e1e1e;color:#d4d4d4;border-radius:8px;padding:16px;margin:12px 0;font-family:monospace;">
+    <span style="color:#569cd6;">例：</span><br>
+    ・グラフの色を変えてほしい<br>
+    ・新しいカテゴリ「ペット費」を追加してほしい<br>
+    ・月別の推移グラフに平均線を入れてほしい<br>
+    ・データ一覧を金額の大きい順に並べたい<br>
+    ・口座管理に〇〇銀行のCSVフォーマットを追加してほしい
+  </div>
+
+  <div class="tip">Claude Codeは、このアプリのフォルダで起動してください。
+  ターミナルで <code>cd "/Volumes/tkg SSD/household-budget-app"</code> のあと
+  <code>claude</code> と入力すると Claude Code が起動します。</div>
+
+  <h3 style="color:#ff5252;">大事な注意：セキュリティチェック</h3>
+
+  <div class="warning">
+    <strong>Claude Codeに編集をお願いした後は、
+    必ずセキュリティチェックも一緒にお願いしてください。</strong>
+  </div>
+
+  <p>コードを変更すると、意図せずセキュリティに穴ができることがあります。
+  編集が終わったら、<strong>同じ会話の中で</strong>以下のようにお願いしましょう。</p>
+
+  <div style="background:#1e1e1e;color:#d4d4d4;border-radius:8px;padding:16px;margin:12px 0;font-family:monospace;">
+    <span style="color:#569cd6;">あなた：</span><br>
+    今の変更でセキュリティ上の問題がないか確認してください。<br>
+    APIキーの漏洩リスクや、個人情報の保護も含めてチェックをお願いします。
+  </div>
+
+  <p>Claude Code は変更した箇所を自動で検出し、以下のようなチェックをしてくれます。</p>
+  <table>
+    <tr><th>チェック項目</th><th>内容</th></tr>
+    <tr><td>APIキーの漏洩</td><td>APIキーがコードに直接書かれていないか</td></tr>
+    <tr><td>個人データの保護</td><td>名前や口座番号がGitに含まれないか</td></tr>
+    <tr><td>エラーメッセージ</td><td>内部情報が画面に表示されないか</td></tr>
+    <tr><td>入力の安全性</td><td>悪意のあるデータが入力されても壊れないか</td></tr>
+    <tr><td>AI送信データ</td><td>外部APIに送る情報が最小限になっているか</td></tr>
+  </table>
+
+  <div class="tip">
+    まとめると、Claude Codeへのお願いは<strong>2ステップ</strong>です：<br>
+    <strong>① やりたいことを伝える</strong>（例：「〇〇を食費にして」）<br>
+    <strong>② セキュリティチェックをお願いする</strong>（例：「セキュリティも確認して」）
+  </div>
+</div>
+
+<!-- 11. APIキー詳細 -->
+<div class="section" id="apikey">
+  <h2>11. APIキーって何？（くわしい説明）</h2>
+
+  <h3>そもそもAPIキーとは？</h3>
+  <p>APIキーは、<strong>外部のAIサービスを使うための「合鍵」</strong>のようなものです。</p>
+  <p>たとえば、Netflixを見るにはアカウントとパスワードが必要ですよね。
+  同じように、AIの機能を使うには「APIキー」という特別な文字列が必要です。</p>
+  <p>APIキーは英数字の長い文字列で、たとえばこんな見た目です：<br>
+  <code style="background:#eee;padding:4px 8px;border-radius:4px;">sk-ant-api03-xxxxx...xxxxx</code>（実際はもっと長い）</p>
+
+  <div class="tip">APIキーがなくても、このアプリの基本機能（データ入力、グラフ、カテゴリ分類、収入管理、ローン管理など）は<strong>すべて使えます</strong>。APIキーが必要なのはAI機能だけです。</div>
+
+  <h3>このアプリで使えるAPIキーは3種類</h3>
+  <table>
+    <tr><th>APIキー</th><th>提供元</th><th>何に使う？</th><th>取得場所</th></tr>
+    <tr>
+      <td><strong>Claude API</strong></td>
+      <td>Anthropic社</td>
+      <td>家計アドバイス、チャット相談</td>
+      <td>console.anthropic.com</td>
+    </tr>
+    <tr>
+      <td><strong>Gemini API</strong></td>
+      <td>Google</td>
+      <td>レシート読み取り、PDF/画像取り込み、アドバイス</td>
+      <td>aistudio.google.com</td>
+    </tr>
+    <tr>
+      <td><strong>Google Sheets API</strong></td>
+      <td>Google</td>
+      <td>Googleスプレッドシートとの連携</td>
+      <td>console.cloud.google.com</td>
+    </tr>
+  </table>
+
+  <h3>無料？有料？料金のしくみ</h3>
+
+  <div style="background:#e8f5e9;border-radius:8px;padding:16px;margin:12px 0;">
+    <h4 style="color:#2e7d32;margin-bottom:8px;">🟢 Gemini API（おすすめ：無料枠あり）</h4>
+    <table>
+      <tr><th>プラン</th><th>料金</th><th>制限</th></tr>
+      <tr><td><strong>無料枠</strong></td><td>0円</td><td>1日あたりのリクエスト数に上限あり（約15回/分、1500回/日）</td></tr>
+      <tr><td>有料（従量課金）</td><td>使った分だけ</td><td>上限が大幅に緩和。月数百円〜数千円程度</td></tr>
+    </table>
+    <p style="margin-top:8px;">レシート読み取りやPDF取り込みに使います。<strong>無料枠でも十分試せます</strong>が、たくさんのPDFを一度に取り込むと上限に達することがあります。その場合は少し時間を空けてください。</p>
+  </div>
+
+  <div style="background:#e3f2fd;border-radius:8px;padding:16px;margin:12px 0;">
+    <h4 style="color:#1565c0;margin-bottom:8px;">🔵 Claude API（高品質なアドバイス）</h4>
+    <table>
+      <tr><th>プラン</th><th>料金</th><th>特徴</th></tr>
+      <tr><td>無料枠</td><td>初回 $5分のクレジット付与</td><td>アカウント作成時にもらえる（キャンペーンにより変動）</td></tr>
+      <tr><td>従量課金</td><td>使った分だけ</td><td>1回のアドバイス生成で約 ¥5〜¥30 程度</td></tr>
+    </table>
+    <p style="margin-top:8px;">家計の総合アドバイスやチャット相談に使います。<strong>質の高い日本語アドバイス</strong>が得られますが、利用には課金が必要になる場合があります。</p>
+  </div>
+
+  <div style="background:#fff3e0;border-radius:8px;padding:16px;margin:12px 0;">
+    <h4 style="color:#e65100;margin-bottom:8px;">🟠 Google Sheets API（無料）</h4>
+    <table>
+      <tr><th>プラン</th><th>料金</th><th>特徴</th></tr>
+      <tr><td>無料</td><td>0円</td><td>Googleアカウントがあれば無料で使える</td></tr>
+    </table>
+    <p style="margin-top:8px;">Googleスプレッドシートから家計データを読み込むのに使います。設定がやや複雑（サービスアカウントの作成が必要）ですが、<strong>完全に無料</strong>です。</p>
+  </div>
+
+  <h3>APIキーの取得手順</h3>
+
+  <h4>Gemini APIキー（一番かんたん）</h4>
+  <div class="step">
+    <span class="step-number">1</span> Googleアカウントでログイン<br>
+    <span class="step-number">2</span> Google AI Studio（aistudio.google.com）にアクセス<br>
+    <span class="step-number">3</span>「Get API key」→「Create API key」をクリック<br>
+    <span class="step-number">4</span> 表示されたキーをコピー<br>
+    <span class="step-number">5</span> アプリのサイドバーにある「Gemini APIキー」欄に貼り付け
+  </div>
+
+  <h4>Claude APIキー</h4>
+  <div class="step">
+    <span class="step-number">1</span> console.anthropic.com でアカウント作成<br>
+    <span class="step-number">2</span> クレジットカードまたはデビットカードを登録（従量課金のため）<br>
+    <span class="step-number">3</span>「API Keys」→「Create Key」をクリック<br>
+    <span class="step-number">4</span> 表示されたキーをコピー（<code>sk-ant-...</code> で始まる文字列）<br>
+    <span class="step-number">5</span> アプリのサイドバーにある「Claude API Key」欄に貼り付け
+  </div>
+
+  <h3>APIキーの安全な管理</h3>
+  <div class="warning">
+    <strong>APIキーは絶対に他人に教えないでください。</strong>
+    キーが漏れると、他の人があなたのアカウントでAIを使い、あなたに料金が請求されます。
+  </div>
+
+  <table>
+    <tr><th>やっていいこと</th><th>やってはいけないこと</th></tr>
+    <tr><td>アプリのパスワード欄に貼り付ける</td><td>SNSやメールに書く</td></tr>
+    <tr><td>使わないときはAPIキーを消す</td><td>GitHubなどに公開する</td></tr>
+    <tr><td>環境変数に設定する（上級者向け）</td><td>他人のパソコンに入力したまま放置</td></tr>
+  </table>
+
+  <div class="tip">
+    <strong>環境変数で設定する方法（上級者向け）：</strong><br>
+    ターミナルの設定ファイル（<code>~/.zshrc</code> など）に以下を追加すると、毎回入力しなくて済みます：<br>
+    <div class="code">
+      export ANTHROPIC_API_KEY="sk-ant-api03-xxxxx"
+    </div>
+    設定後はターミナルを再起動してからアプリを起動してください。
+  </div>
+
+  <h3>結局どれを使えばいい？</h3>
+  <table>
+    <tr><th>使い方</th><th>おすすめ</th><th>費用</th></tr>
+    <tr><td>AIは使わない。データ管理・グラフだけ</td><td><strong>APIキー不要</strong></td><td>0円</td></tr>
+    <tr><td>レシートやPDFの取り込みをしたい</td><td><strong>Gemini API（無料枠）</strong></td><td>0円</td></tr>
+    <tr><td>しっかり家計のアドバイスがほしい</td><td><strong>Claude API + Gemini API</strong></td><td>月 数百円〜</td></tr>
+    <tr><td>全部使いたい</td><td><strong>Claude + Gemini + Google Sheets</strong></td><td>月 数百円〜</td></tr>
+  </table>
+</div>
+
+</div>
+
+<div class="footer">
+  🏠 家計管理ダッシュボード v2.0.0 | 最終更新: 2026-04-03
+</div>
+
+</body>
+</html>
