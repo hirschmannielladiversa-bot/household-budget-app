@@ -3983,20 +3983,27 @@ def show_bank_management_tab() -> None:
                         for up in uploaded_images:
                             st.info(f"🖼️ {html.escape(up.name)} ({up.size / 1024:.1f} KB)")
 
+                        st.caption(f"📸 {len(uploaded_images)}枚（自動圧縮してAPI送信します）")
+
                         if st.button("🔍 画像を解析してインポート", type="primary", key="import_stmt_img_btn"):
+                            import time as _time
                             total_all = 0
                             all_errors = []
-                            for up in uploaded_images:
+                            progress_bar = st.progress(0, text="準備中...")
+                            for i, up in enumerate(uploaded_images):
                                 if up.size > 10 * 1024 * 1024:
                                     all_errors.append(f"{up.name}: ファイルサイズが10MBを超えています")
                                     continue
-                                with st.spinner(f"解析中: {up.name}..."):
-                                    count, errs = bm.import_statement_image(
-                                        up.read(), selected_acc, gemini_key,
-                                        is_credit_card=is_credit,
-                                    )
-                                    total_all += count
-                                    all_errors.extend(errs)
+                                progress_bar.progress(i / len(uploaded_images), text=f"解析中: {up.name}（{i+1}/{len(uploaded_images)}）")
+                                count, errs = bm.import_statement_image(
+                                    up.read(), selected_acc, gemini_key,
+                                    is_credit_card=is_credit,
+                                )
+                                total_all += count
+                                all_errors.extend(errs)
+                                if i < len(uploaded_images) - 1:
+                                    _time.sleep(5)
+                            progress_bar.empty()
 
                             if total_all > 0:
                                 bm.save_to_csv()

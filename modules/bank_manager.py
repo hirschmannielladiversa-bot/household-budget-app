@@ -777,6 +777,52 @@ class BankManager:
             max_text_len=max_text_len,
         )
 
+    @staticmethod
+    def _compress_image(image_bytes: bytes, max_size_kb: int = 800, max_dimension: int = 1600) -> bytes:
+        """画像を圧縮してAPIに送信可能なサイズにする"""
+        from PIL import Image
+        import io
+
+        img = Image.open(io.BytesIO(image_bytes))
+
+        # EXIF回転を適用
+        try:
+            from PIL import ExifTags
+            for orientation in ExifTags.TAGS.keys():
+                if ExifTags.TAGS[orientation] == 'Orientation':
+                    break
+            exif = img._getexif()
+            if exif and orientation in exif:
+                if exif[orientation] == 3:
+                    img = img.rotate(180, expand=True)
+                elif exif[orientation] == 6:
+                    img = img.rotate(270, expand=True)
+                elif exif[orientation] == 8:
+                    img = img.rotate(90, expand=True)
+        except (AttributeError, KeyError, TypeError):
+            pass
+
+        # RGBに変換
+        if img.mode != 'RGB':
+            img = img.convert('RGB')
+
+        # リサイズ（長辺をmax_dimensionに）
+        w, h = img.size
+        if max(w, h) > max_dimension:
+            ratio = max_dimension / max(w, h)
+            img = img.resize((int(w * ratio), int(h * ratio)), Image.LANCZOS)
+
+        # 品質を下げながら目標サイズ以下にする
+        for quality in [85, 70, 55, 40]:
+            buf = io.BytesIO()
+            img.save(buf, format='JPEG', quality=quality, optimize=True)
+            if buf.tell() <= max_size_kb * 1024:
+                return buf.getvalue()
+
+        buf = io.BytesIO()
+        img.save(buf, format='JPEG', quality=30, optimize=True)
+        return buf.getvalue()
+
     def import_statement_image(
         self,
         image_bytes: bytes,
@@ -828,21 +874,52 @@ class BankManager:
 
         try:
             import base64
+            import time
+            from PIL import Image
+            import io
+
+            # 画像を圧縮（大きい画像はAPIのトークン制限に引っかかるため）
+            compressed = self._compress_image(image_bytes, max_size_kb=800)
+
             client = genai.Client(api_key=gemini_api_key)
             image_part = {
                 "inline_data": {
                     "mime_type": "image/jpeg",
-                    "data": base64.b64encode(image_bytes).decode("utf-8"),
+                    "data": base64.b64encode(compressed).decode("utf-8"),
                 }
             }
-            response = client.models.generate_content(
-                model="gemini-2.0-flash",
-                contents=[prompt, image_part],
-            )
-            result_text = response.text
+
+            # リトライ（レート制限対策）
+            last_error = None
+            for attempt in range(3):
+                try:
+                    response = client.models.generate_content(
+                        model="gemini-2.0-flash",
+                        contents=[prompt, image_part],
+                    )
+                    result_text = response.text
+                    last_error = None
+                    break
+                except Exception as retry_e:
+                    last_error = retry_e
+                    logger.warning(f"Gemini Vision リトライ {attempt + 1}/3: {retry_e}")
+                    if attempt < 2:
+                        time.sleep(10 * (attempt + 1))
+
+            if last_error:
+                raise last_error
+
         except Exception as e:
             logger.error(f"Gemini Vision APIエラー: {e}")
-            return 0, ["画像解析に失敗しました。APIキーの有効期限や利用制限を確認してください。"]
+            err_str = str(e)
+            if "429" in err_str or "RESOURCE_EXHAUSTED" in err_str:
+                return 0, ["API利用制限に達しています。数分待ってから再試行するか、有料プランへの切り替えをご検討ください。"]
+            elif "403" in err_str or "PERMISSION_DENIED" in err_str:
+                return 0, ["APIキーが無効です。正しいGemini APIキーを設定してください。"]
+            elif "400" in err_str or "INVALID_ARGUMENT" in err_str:
+                return 0, ["画像の形式に問題があります。JPGまたはPNGファイルを使用してください。"]
+            else:
+                return 0, ["画像解析に失敗しました。APIキーの有効期限や利用制限を確認してください。"]
 
         json_match = re.search(r"\{[\s\S]*\}", result_text)
         if not json_match:

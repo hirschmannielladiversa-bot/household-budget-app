@@ -93,7 +93,7 @@ NotebookLM を使った連携手順を説明します。
 
 1. アプリを起動
    ```bash
-   cd "/Volumes/tkg SSD/household-budget-app"
+   cd household-budget-app
    pip install -r requirements.txt
    streamlit run app.py
    ```

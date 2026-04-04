@@ -111,6 +111,11 @@ export ANTHROPIC_API_KEY="sk-ant-..."
 - Anthropic API / Google Gemini API（オプション）
 - cryptography（Fernet暗号化）
 
+## 作成者・連絡先
+
+- **作成者**: TKG.M.
+- **質問・感想**: [GitHub Issues](https://github.com/hirschmannielladiversa-bot/household-budget-app/issues) からお願いします
+
 ## ライセンス
 
-個人利用。
+個人利用限定。2次配布は禁止です。
