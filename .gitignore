@@ -57,8 +57,15 @@ data/*.encrypted
 *.env
 
 # Claude Code internal
-.claude/state/
-.claude/settings.local.json
+.claude/
+CLAUDE.md
+HANDOFF_TO_CURSOR.md
+Plans.md
+switch_to_real.sh
+switch_to_sample.sh
+pdf_splitter.py
+modules/pdf_splitter.py
+家計アプリ起動.command
 
 # Sample/backup subdirectories (sample_budget.csv and sample_assets.csv are kept at data/ level)
 data/sample/
