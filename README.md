@@ -18,7 +18,7 @@ Streamlitベースのダッシュボードで、多角的なグラフ分析とAI
 
 ### 方法1: ダブルクリック（推奨）
 
-`家計アプリ起動.command` をダブルクリックするだけ。
+`開始はこのフォルダ/家計アプリ起動.command` をダブルクリックするだけ。
 
 > 初回に「開発元が未確認」と表示された場合:
 > ファイルを右クリック → 「開く」 → 「開く」
@@ -34,9 +34,13 @@ python3 -m streamlit run app.py
 
 ```
 household-budget-app/
+├── 開始はこのフォルダ/               # ★ まずここを開く
+│   ├── 家計アプリ起動.command        # ダブルクリック起動
+│   ├── はじめにお読みください.md      # 使い方の概要
+│   ├── 使い方ガイド.html             # 詳しい操作説明
+│   └── 開発ログ.html                # 開発の経緯
 ├── app.py                          # メインアプリ
 ├── requirements.txt                # 依存関係
-├── 家計アプリ起動.command            # ダブルクリック起動
 ├── config/
 │   ├── categories.yaml             # カテゴリ設定
 │   ├── bank_formats.yaml           # 銀行CSV/分類パターン
@@ -51,6 +55,7 @@ household-budget-app/
 │   ├── advisor.py                  # AIアドバイス
 │   ├── bank_manager.py             # 口座・取引管理
 │   ├── asset_manager.py            # 資産管理
+│   ├── asset_visualizer.py         # 資産グラフ
 │   ├── tax_calculator.py           # 税金計算
 │   ├── year_end_adjustment.py      # 年末調整
 │   ├── crypto_manager.py           # データ暗号化
@@ -102,7 +107,7 @@ export ANTHROPIC_API_KEY="sk-ant-..."
 
 ## 使い方ガイド
 
-`templates/usage_guide.html` をブラウザで開いてください。
+`開始はこのフォルダ/使い方ガイド.html` をダブルクリックしてください。
 中学生でもわかるステップバイステップガイドです。
 
 ## 技術スタック
