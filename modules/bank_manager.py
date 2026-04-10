@@ -65,6 +65,11 @@ class BankManager:
         self.formats = self._load_formats()
         # 設定ファイルからカテゴリパターンを読み込み
         self.CATEGORY_PATTERNS = self.formats.get('category_patterns', self.DEFAULT_CATEGORY_PATTERNS)
+        # 起動時に1度だけパターンを正規化しておく（毎行で NFKC 正規化を避ける）
+        self._NORMALIZED_PATTERNS = [
+            (category, [unicodedata.normalize('NFKC', p).upper() for p in patterns])
+            for category, patterns in self.CATEGORY_PATTERNS.items()
+        ]
 
         # 口座マスタ
         self.accounts_df: Optional[pd.DataFrame] = None
@@ -390,20 +395,19 @@ class BankManager:
         Returns:
             カテゴリ名
         """
-        # NFKC正規化で半角全角を統一し、大文字に変換
+        # NFKC正規化で半角全角を統一し、大文字に変換（摘要側のみ毎回実行）
         normalized_desc = unicodedata.normalize('NFKC', description).upper()
 
-        for category, patterns in self.CATEGORY_PATTERNS.items():
-            for pattern in patterns:
-                # パターンも同様に正規化
-                normalized_pattern = unicodedata.normalize('NFKC', pattern).upper()
+        # パターン側は __init__ で正規化済みなので直接比較
+        for category, normalized_patterns in self._NORMALIZED_PATTERNS:
+            for normalized_pattern in normalized_patterns:
                 if normalized_pattern in normalized_desc:
                     return category
 
         return 'その他'
 
     def reclassify_transactions(self, only_other: bool = True) -> int:
-        """取引のカテゴリを再分類
+        """取引のカテゴリを再分類（ベクトル化版）
 
         Args:
             only_other: Trueの場合「その他」のみ再分類、Falseで全件再分類
@@ -414,20 +418,32 @@ class BankManager:
         if self.transactions_df is None or len(self.transactions_df) == 0:
             return 0
 
-        count = 0
-        for idx, row in self.transactions_df.iterrows():
-            if only_other and row['category'] != 'その他':
-                continue
+        df = self.transactions_df
 
-            # メモに使途が記入済みの場合、手動分類とみなしスキップ
-            memo = str(row.get('memo', '') or '').strip()
-            if not only_other and memo and row['category'] != '交通費':
-                continue
+        # 対象行のマスクを作成（iterrows を使わず一括判定）
+        if only_other:
+            mask = df['category'] == 'その他'
+        else:
+            # 全件対象だが、メモ記入済み（手動分類）で「交通費」以外はスキップ
+            memo_series = df.get('memo', pd.Series([''] * len(df))).fillna('').astype(str).str.strip()
+            skip_manual = (memo_series != '') & (df['category'] != '交通費')
+            mask = ~skip_manual
 
-            new_category = self.classify_category(row['description'])
-            if new_category != row['category']:
-                self.transactions_df.loc[idx, 'category'] = new_category
-                count += 1
+        if not mask.any():
+            return 0
+
+        # 対象行の description に対してのみ classify_category を呼ぶ
+        target_descs = df.loc[mask, 'description'].fillna('').astype(str)
+        new_categories = target_descs.map(self.classify_category)
+
+        old_categories = df.loc[mask, 'category']
+        changed_mask = new_categories != old_categories
+        count = int(changed_mask.sum())
+
+        if count > 0:
+            # 変更があった行だけ一括代入（loc の単発代入で高速）
+            change_idx = new_categories[changed_mask].index
+            df.loc[change_idx, 'category'] = new_categories[changed_mask]
 
         return count
 
@@ -894,7 +910,7 @@ class BankManager:
             for attempt in range(3):
                 try:
                     response = client.models.generate_content(
-                        model="gemini-2.0-flash",
+                        model="gemini-2.5-flash",
                         contents=[prompt, image_part],
                     )
                     result_text = response.text

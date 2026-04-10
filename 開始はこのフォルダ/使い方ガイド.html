@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>家計管理ダッシュボード - 使い方ガイド</title>
+<title>家計管理ダッシュボード - 使い方ガイド（Mac配布版 v2.0.2）</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif; background: #f5f7fa; color: #333; line-height: 1.8; }
@@ -84,11 +84,22 @@
     <span class="step-number" style="background:#4CAF50;">4</span> ブラウザに家計ダッシュボードが表示されたら準備完了！
   </div>
 
-  <div class="tip">初回のみ、必要なソフトが自動でインストールされます（少し時間がかかります）。</div>
+  <div class="tip">
+    <strong>事前準備（初回のみ）：Python 3.12 のインストール</strong><br>
+    <a href="https://www.python.org/downloads/macos/" target="_blank">python.org</a>
+    から <strong>Python 3.12</strong> をダウンロード・インストールしてください。
+    最新の 3.13 / 3.14 は一部パッケージが未対応の可能性があります。<br>
+    初回起動時に、必要なパッケージが自動でインストールされます（数分かかります）。
+  </div>
 
   <div class="warning">
     初めてダブルクリックした時に「開発元が未確認のため開けません」と出たら：<br>
     → ファイルを<strong>右クリック</strong> →「開く」→「開く」をクリックしてください（初回のみ）。
+  </div>
+
+  <div class="tip" style="background:#fff3cd;border-left-color:#ffc107;">
+    <strong>💡 配布版を初めて使う時のおすすめ手順</strong><br>
+    ① アプリ起動 → ② 「サンプル（山田太郎）」を選んで機能を試す → ③ 慣れたら「ユーザー切り替え」→「自分のデータ」で自分の家計を入力
   </div>
 
   <h3>終了するには</h3>
@@ -98,10 +109,14 @@
   <details style="margin:8px 0;">
     <summary style="cursor:pointer;color:#999;">ターミナルコマンドを表示（クリックで展開）</summary>
     <div class="code" style="margin-top:8px;">
-      cd household-budget-app<br>
-      pip install -r requirements.txt  # 初回のみ<br>
+      cd household-budget-app-配布版-Mac<br>
+      pip3 install -r requirements.txt  # 初回のみ<br>
       python3 -m streamlit run app.py
     </div>
+    <p style="color:#999;font-size:0.9em;margin-top:8px;">
+      ※ <code>pip install</code> で <code>externally-managed-environment</code> エラーが出る場合は
+      <code>pip3 install --break-system-packages -r requirements.txt</code> を試してください。
+    </p>
   </details>
 </div>
 
