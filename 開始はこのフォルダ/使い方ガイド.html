@@ -74,50 +74,71 @@
 <!-- 1. 起動 -->
 <div class="section" id="start">
   <h2>1. アプリを起動する</h2>
-  <p>アプリの起動はとてもかんたんです。<strong>ファイルをダブルクリックするだけ</strong>です。</p>
 
-  <h3 style="color:#667eea;">おすすめ：ダブルクリックで起動</h3>
-  <div class="step" style="background:#e8f5e9;border-left-color:#4CAF50;">
-    <span class="step-number" style="background:#4CAF50;">1</span> アプリのフォルダを開く<br>
-    <span class="step-number" style="background:#4CAF50;">2</span> <strong>「家計アプリ起動.command」</strong>をダブルクリック<br>
-    <span class="step-number" style="background:#4CAF50;">3</span> 黒い画面（ターミナル）が出て、自動でブラウザが開きます<br>
-    <span class="step-number" style="background:#4CAF50;">4</span> ブラウザに家計ダッシュボードが表示されたら準備完了！
+  <div class="warning" style="background:#fff3e0;border-left-color:#ff6f00;">
+    <strong>初回はターミナルから起動してください</strong><br>
+    macOS では、ダウンロードした <code>.command</code> ファイルをダブルクリックや右クリック→「開く」で実行しようとすると、
+    <strong>Gatekeeper（セキュリティ機能）によりブロックされて正常に開けない</strong>ことがあります。
+    特に macOS Ventura / Sequoia 以降で制限が厳しくなっています。<br>
+    <strong>一度ターミナルから起動すれば、2回目以降はダブルクリックでもOK</strong>になります。
   </div>
 
   <div class="tip">
     <strong>事前準備（初回のみ）：Python 3.12 のインストール</strong><br>
     <a href="https://www.python.org/downloads/macos/" target="_blank">python.org</a>
     から <strong>Python 3.12</strong> をダウンロード・インストールしてください。
-    最新の 3.13 / 3.14 は一部パッケージが未対応の可能性があります。<br>
-    初回起動時に、必要なパッケージが自動でインストールされます（数分かかります）。
+    最新の 3.13 / 3.14 は一部パッケージが未対応の可能性があります。
   </div>
 
-  <div class="warning">
-    初めてダブルクリックした時に「開発元が未確認のため開けません」と出たら：<br>
-    → ファイルを<strong>右クリック</strong> →「開く」→「開く」をクリックしてください（初回のみ）。
+  <h3 style="color:#ff6f00;">初回：ターミナルから起動する（推奨）</h3>
+
+  <div class="step" style="background:#fff8e1;border-left-color:#ff6f00;">
+    <span class="step-number" style="background:#ff6f00;">1</span><strong>ターミナルを開く</strong><br>
+    <span style="margin-left:36px;">Finder →「アプリケーション」→「ユーティリティ」→ <strong>ターミナル.app</strong></span><br>
+    <span style="margin-left:36px;">または Spotlight（<code>Cmd + Space</code>）で「ターミナル」と入力</span>
+  </div>
+
+  <div class="step" style="background:#fff8e1;border-left-color:#ff6f00;">
+    <span class="step-number" style="background:#ff6f00;">2</span><strong>アプリのフォルダに移動する</strong><br>
+    <span style="margin-left:36px;">ターミナルに以下を入力します（フォルダの場所に合わせて変えてください）：</span>
+    <div class="code" style="margin:8px 0 4px 36px;">cd ~/Desktop/household-budget-app-v2.5.0-Mac</div>
+    <span style="margin-left:36px;font-size:0.9em;color:#888;">ヒント: <code>cd </code> と打ったあとに、Finder からフォルダをターミナルにドラッグ＆ドロップするとパスが自動入力されます</span>
+  </div>
+
+  <div class="step" style="background:#fff8e1;border-left-color:#ff6f00;">
+    <span class="step-number" style="background:#ff6f00;">3</span><strong>必要なパッケージをインストール（初回のみ）</strong>
+    <div class="code" style="margin:8px 0 4px 36px;">pip3 install -r requirements.txt</div>
+    <span style="margin-left:36px;font-size:0.9em;color:#888;">エラー <code>externally-managed-environment</code> が出た場合：</span>
+    <div class="code" style="margin:4px 0 0 36px;">pip3 install --break-system-packages -r requirements.txt</div>
+  </div>
+
+  <div class="step" style="background:#fff8e1;border-left-color:#ff6f00;">
+    <span class="step-number" style="background:#ff6f00;">4</span><strong>アプリを起動する</strong>
+    <div class="code" style="margin:8px 0 4px 36px;">python3 -m streamlit run app.py</div>
+    <span style="margin-left:36px;">ブラウザが自動で開き、家計ダッシュボードが表示されれば成功です。</span><br>
+    <span style="margin-left:36px;font-size:0.9em;color:#888;">開かない場合は <a href="http://localhost:8501">http://localhost:8501</a> にアクセスしてください。</span>
   </div>
 
   <div class="tip" style="background:#fff3cd;border-left-color:#ffc107;">
-    <strong>💡 配布版を初めて使う時のおすすめ手順</strong><br>
-    ① アプリ起動 → ② 「サンプル（山田太郎）」を選んで機能を試す → ③ 慣れたら「ユーザー切り替え」→「自分のデータ」で自分の家計を入力
+    <strong>配布版を初めて使う時のおすすめ手順</strong><br>
+    起動したら → 「サンプル（山田太郎）」を選んで機能を試す → 慣れたら「ユーザー切り替え」→「自分のデータ」で自分の家計を入力
+  </div>
+
+  <h3 style="color:#667eea;margin-top:28px;">2回目以降：ダブルクリックで起動</h3>
+  <p>一度ターミナルから起動に成功すれば、次回からはこのフォルダにある <strong>「家計アプリ起動.command」</strong> をダブルクリックするだけで起動できます。</p>
+  <div class="step" style="background:#e8f5e9;border-left-color:#4CAF50;">
+    <span class="step-number" style="background:#4CAF50;">1</span> <strong>「家計アプリ起動.command」</strong>をダブルクリック<br>
+    <span class="step-number" style="background:#4CAF50;">2</span> 黒い画面（ターミナル）が出て、自動でブラウザが開きます<br>
+    <span class="step-number" style="background:#4CAF50;">3</span> ブラウザに家計ダッシュボードが表示されたら準備完了！
+  </div>
+
+  <div class="warning">
+    「開発元が未確認のため開けません」と出たら：<br>
+    → ファイルを<strong>右クリック</strong> →「開く」→「開く」をクリックしてください（初回のみ）。
   </div>
 
   <h3>終了するには</h3>
-  <p>起動時に表示された黒い画面（ターミナル）を<strong>閉じる</strong>か、<code>Ctrl + C</code> を押すとアプリが終了します。</p>
-
-  <h3 style="color:#999;margin-top:24px;">上級者向け：ターミナルから起動</h3>
-  <details style="margin:8px 0;">
-    <summary style="cursor:pointer;color:#999;">ターミナルコマンドを表示（クリックで展開）</summary>
-    <div class="code" style="margin-top:8px;">
-      cd household-budget-app-配布版-Mac<br>
-      pip3 install -r requirements.txt  # 初回のみ<br>
-      python3 -m streamlit run app.py
-    </div>
-    <p style="color:#999;font-size:0.9em;margin-top:8px;">
-      ※ <code>pip install</code> で <code>externally-managed-environment</code> エラーが出る場合は
-      <code>pip3 install --break-system-packages -r requirements.txt</code> を試してください。
-    </p>
-  </details>
+  <p>ターミナルで <code>Ctrl + C</code> を押すか、ターミナルウィンドウを閉じてください。</p>
 </div>
 
 <!-- 2. データ入力 -->
@@ -494,8 +515,6 @@
   </table>
 </div>
 
-</div>
-
 <!-- 10. Claude Codeでカスタマイズ -->
 <div class="section" id="claudecode">
   <h2>10. アプリのカスタマイズ（Claude Code）</h2>
@@ -690,7 +709,7 @@
 </div>
 
 <div class="footer">
-  🏠 家計管理ダッシュボード v2.3.0 | 最終更新: 2026-04-15
+  🏠 家計管理ダッシュボード v2.5.0 | 最終更新: 2026-04-16
 </div>
 
 </body>
