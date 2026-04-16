@@ -48,7 +48,7 @@
 
 <div class="header">
   <h1>🏠 家計管理ダッシュボード</h1>
-  <p>使い方ガイド（バージョン 2.0.1）</p>
+  <p>使い方ガイド（バージョン 2.5.0）</p>
 </div>
 
 <div class="container">
@@ -141,6 +141,11 @@
       <h4>方法3：口座CSV取り込み</h4>
       <p>銀行やカードのCSVを取り込み</p>
     </div>
+    <div class="feature-card" style="background:linear-gradient(135deg,#fff8e1 0%,#fff3e0 100%);border:2px solid #ffc107;">
+      <div class="icon">📷</div>
+      <h4 style="color:#ff6f00;">方法4：レシート画像・PDF読み取り</h4>
+      <p><strong style="color:#ff6f00;">v2.5.0 New!</strong><br>写真やPDFから自動入力</p>
+    </div>
   </div>
 
   <h3>方法1：ファイルアップロード</h3>
@@ -169,6 +174,113 @@
     <span class="step-number">2</span>「➕ 口座追加」で銀行口座やカードを登録<br>
     <span class="step-number">3</span>「📥 CSV取り込み」で銀行からダウンロードしたCSVを取り込み<br>
     <span class="step-number">4</span>「📤 家計へ連携」で家計データに反映
+  </div>
+
+  <h3 id="receipt-pdf" style="color:#ff6f00;">方法4：レシート画像・PDF読み取り <span style="background:#ff6f00;color:white;padding:2px 10px;border-radius:12px;font-size:0.75em;vertical-align:middle;">v2.5.0 New!</span></h3>
+  <p>レシートの<strong>写真（JPG/PNG/WebP）</strong>や、Amazon注文確認メールの<strong>PDF</strong>、電子レシートの<strong>PDF</strong>をアップロードするだけで、AI（Google Gemini）が日付・店舗名・カテゴリ・金額を自動で読み取ります。</p>
+
+  <h4 style="margin-top:20px;color:#555;">📍 どこにあるの？</h4>
+  <p>以下の<strong>2箇所</strong>で使えます。好きな方からどうぞ。</p>
+
+  <!-- ビジュアルマップ: タブ構造 -->
+  <div style="background:#f8f9ff;border:2px dashed #667eea;border-radius:12px;padding:20px;margin:16px 0;">
+    <div style="font-size:0.85em;color:#888;margin-bottom:8px;">🖥️ 画面のイメージ</div>
+
+    <!-- メインタブ行 -->
+    <div style="background:white;border-radius:8px;padding:10px;box-shadow:0 1px 3px rgba(0,0,0,0.05);margin-bottom:14px;">
+      <div style="font-size:0.8em;color:#999;margin-bottom:6px;">▼ 画面上部のタブ</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;">
+        <span style="background:#eee;padding:4px 10px;border-radius:6px;font-size:0.85em;">📋 概要</span>
+        <span style="background:#eee;padding:4px 10px;border-radius:6px;font-size:0.85em;">📈 グラフ</span>
+        <span style="background:#eee;padding:4px 10px;border-radius:6px;font-size:0.85em;">💰 収入管理</span>
+        <span style="background:#ff6f00;color:white;padding:4px 10px;border-radius:6px;font-size:0.85em;font-weight:bold;">💸 支出管理 ⬅ ここ</span>
+        <span style="background:#eee;padding:4px 10px;border-radius:6px;font-size:0.85em;">🧭 アドバイス</span>
+      </div>
+    </div>
+
+    <!-- サブタブ -->
+    <div style="background:white;border-radius:8px;padding:10px;box-shadow:0 1px 3px rgba(0,0,0,0.05);margin-bottom:14px;">
+      <div style="font-size:0.8em;color:#999;margin-bottom:6px;">▼ 支出管理タブ内のサブタブ</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;">
+        <span style="background:#ff6f00;color:white;padding:4px 10px;border-radius:6px;font-size:0.85em;font-weight:bold;">📷 画像・PDF読み取り ⬅ ここ</span>
+        <span style="background:#eee;padding:4px 10px;border-radius:6px;font-size:0.85em;">📥 CSV・Excel取り込み</span>
+        <span style="background:#eee;padding:4px 10px;border-radius:6px;font-size:0.85em;">✏️ 手入力</span>
+        <span style="background:#eee;padding:4px 10px;border-radius:6px;font-size:0.85em;">📄 データ一覧</span>
+      </div>
+    </div>
+
+    <!-- アップロードエリア -->
+    <div style="background:white;border-radius:8px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+      <div style="font-size:0.8em;color:#999;margin-bottom:8px;">▼ ファイルのアップロード</div>
+      <div style="border:2px dashed #667eea;border-radius:8px;padding:20px;text-align:center;background:#fafbff;">
+        <div style="font-size:2em;">📷📄</div>
+        <div style="margin-top:6px;color:#555;"><strong>レシート画像またはPDFをアップロード（複数可）</strong></div>
+        <div style="font-size:0.85em;color:#888;margin-top:4px;">jpg / jpeg / png / webp / <span style="background:#ff6f00;color:white;padding:1px 6px;border-radius:4px;font-weight:bold;">pdf</span></div>
+      </div>
+      <div style="text-align:center;margin-top:12px;">
+        <span style="background:#ff4b4b;color:white;padding:8px 18px;border-radius:8px;font-size:0.95em;font-weight:bold;">🔍 N件を一括読み取り</span>
+      </div>
+    </div>
+  </div>
+
+  <h4 style="margin-top:20px;color:#555;">📝 使う手順（3ステップ）</h4>
+  <div class="step" style="background:#fff8e1;border-left-color:#ffc107;">
+    <span class="step-number" style="background:#ff6f00;">1</span><strong>「💸 支出管理」タブ</strong> →「📷 画像・PDF読み取り」サブタブ を開く<br>
+    <span class="step-number" style="background:#ff6f00;">2</span> レシート写真やPDFファイルを<strong>ドラッグ＆ドロップ</strong>（または参照ボタン）<br>
+    <span class="step-number" style="background:#ff6f00;">3</span><strong>「🔍 N件を一括読み取り」</strong>ボタンをクリック
+  </div>
+
+  <!-- 結果テーブルのイメージ -->
+  <h4 style="margin-top:20px;color:#555;">📋 読み取り結果のイメージ</h4>
+  <p>読み取り後、内容を確認できるテーブルが表示されます。そのまま<strong>「✅ 選択した N件を支出に追加」</strong>ボタンで家計簿に登録できます（手動で修正も可能）。</p>
+
+  <div style="background:#f8f9ff;border-radius:8px;padding:14px;margin:12px 0;overflow-x:auto;">
+    <table style="margin:0;font-size:0.88em;">
+      <tr>
+        <th style="background:#ff6f00;">✓</th>
+        <th style="background:#ff6f00;">日付</th>
+        <th style="background:#ff6f00;">カテゴリ</th>
+        <th style="background:#ff6f00;">金額</th>
+        <th style="background:#ff6f00;">メモ</th>
+        <th style="background:#ff6f00;">信頼度</th>
+      </tr>
+      <tr>
+        <td>☑</td>
+        <td>2026-04-10</td>
+        <td>食費</td>
+        <td>¥2,480</td>
+        <td>イオン - 食料品</td>
+        <td>95%</td>
+      </tr>
+      <tr>
+        <td>☑</td>
+        <td>2026-04-12</td>
+        <td>日用品</td>
+        <td>¥1,320</td>
+        <td>マツキヨ - 洗剤・ティッシュ</td>
+        <td>92%</td>
+      </tr>
+      <tr>
+        <td>☑</td>
+        <td>2026-04-14</td>
+        <td>交通費</td>
+        <td>¥5,800</td>
+        <td>JR東日本 - 新幹線チケット（PDF）</td>
+        <td>98%</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="tip">
+    <strong>PDFが扱える例：</strong> Amazon の注文確認、楽天の電子レシート、ヨドバシ・ビックカメラの領収書PDF、新幹線チケット（えきねっと）、航空券の請求書など。紙レシートは写真（JPG/PNG）でOK。
+  </div>
+
+  <div class="tip">
+    <strong>サイドバー版もあります：</strong> 1枚だけサッと読み取りたい時は、左サイドバーの「📷 レシート自動読み取り」からも同じ機能（画像・PDF両対応）が使えます。
+  </div>
+
+  <div class="warning">
+    この機能は <strong>Gemini API キー</strong> が必要です。サイドバー「🤖 AI アドバイス」セクションでキーを入力してください（<a href="#ai">セクション7</a>参照）。<strong>無料枠</strong>で十分使えます。
   </div>
 
   <div class="tip">データは「💾 保存」ボタンで保存されます。次回起動時に自動で読み込まれます。</div>
@@ -300,7 +412,7 @@
     <tr><th>AI機能</th><th>必要なAPIキー</th><th>できること</th></tr>
     <tr><td>家計アドバイス</td><td>Claude API または Gemini API</td><td>家計の診断とアクションプラン</td></tr>
     <tr><td>チャット相談</td><td>Claude API または Gemini API</td><td>対話形式で家計相談</td></tr>
-    <tr><td>レシート読み取り</td><td>Gemini API</td><td>レシート写真から自動入力</td></tr>
+    <tr><td>レシート読み取り（<strong>PDF対応 v2.5.0</strong>）</td><td>Gemini API</td><td>レシート写真・電子レシートPDFから自動入力</td></tr>
     <tr><td>PDF/画像取り込み</td><td>Gemini API</td><td>明細PDF・画像から取引取り込み</td></tr>
   </table>
 
@@ -578,7 +690,7 @@
 </div>
 
 <div class="footer">
-  🏠 家計管理ダッシュボード v2.0.1 | 最終更新: 2026-04-04
+  🏠 家計管理ダッシュボード v2.3.0 | 最終更新: 2026-04-15
 </div>
 
 </body>

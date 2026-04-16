@@ -67,7 +67,7 @@ class BankManager:
         self.CATEGORY_PATTERNS = self.formats.get('category_patterns', self.DEFAULT_CATEGORY_PATTERNS)
         # 起動時に1度だけパターンを正規化しておく（毎行で NFKC 正規化を避ける）
         self._NORMALIZED_PATTERNS = [
-            (category, [unicodedata.normalize('NFKC', p).upper() for p in patterns])
+            (category, [self._normalize_for_matching(p) for p in patterns])
             for category, patterns in self.CATEGORY_PATTERNS.items()
         ]
 
@@ -386,6 +386,29 @@ class BankManager:
 
         return removed_count
 
+    # 銀行CSV特有の表記ゆれを吸収する正規化テーブル
+    # 小さいカタカナ → 大きいカタカナ（銀行CSVは小書き文字を通常文字で代用）
+    _SMALL_TO_LARGE_KANA = str.maketrans(
+        'ァィゥェォッャュョヮヵヶ',
+        'アイウエオツヤユヨワカケ'
+    )
+
+    @staticmethod
+    def _normalize_for_matching(text: str) -> str:
+        """銀行CSV向けの文字列正規化（マッチング用）
+
+        1. NFKC正規化（半角全角統一）
+        2. 大文字化
+        3. スペース除去
+        4. 小書きカタカナ → 通常カタカナ（ッ→ツ、ァ→ア 等）
+        5. ダッシュ・ハイフン類を除去（ー, -, ‐, – 等）
+        """
+        text = unicodedata.normalize('NFKC', text).upper().replace(' ', '')
+        text = text.translate(BankManager._SMALL_TO_LARGE_KANA)
+        # 長音符・ハイフン類をすべて除去
+        text = text.replace('ー', '').replace('-', '').replace('‐', '').replace('–', '').replace('—', '').replace('−', '')
+        return text
+
     def classify_category(self, description: str) -> str:
         """摘要からカテゴリを推定
 
@@ -395,8 +418,7 @@ class BankManager:
         Returns:
             カテゴリ名
         """
-        # NFKC正規化で半角全角を統一し、大文字に変換（摘要側のみ毎回実行）
-        normalized_desc = unicodedata.normalize('NFKC', description).upper()
+        normalized_desc = self._normalize_for_matching(description)
 
         # パターン側は __init__ で正規化済みなので直接比較
         for category, normalized_patterns in self._NORMALIZED_PATTERNS:
@@ -646,6 +668,8 @@ class BankManager:
             return 0, ["Gemini APIキーが設定されていません"]
 
         # PDFからテキスト抽出（各ページごと）
+        is_scan_pdf = False
+        page_images = []
         try:
             if isinstance(file, bytes):
                 pdf = pdfplumber.open(BytesIO(file))
@@ -655,14 +679,18 @@ class BankManager:
             page_texts: List[str] = []
             for page in pdf.pages:
                 page_texts.append(page.extract_text() or "")
+
+            # スキャンPDF判定: テキストがほぼ空
+            if not any(t.strip() for t in page_texts):
+                is_scan_pdf = True
+                for page in pdf.pages:
+                    page_images.append(page.to_image(resolution=200).original)
+
             pdf.close()
 
         except Exception as e:
             logger.error(f"PDF読み込みエラー: {e}")
             return 0, ["PDFの読み込みに失敗しました。ファイルを確認してください。"]
-
-        if not any(t.strip() for t in page_texts):
-            return 0, ["PDFからテキストを抽出できませんでした"]
 
         # Gemini APIで解析（分割する場合はチャンクごとに複数回呼び出し）
         prompt_template = """以下はクレジットカード明細のPDFから抽出したテキストです。
@@ -690,16 +718,6 @@ class BankManager:
 - 年会費、分割手数料なども取引として含めてください
 """
 
-        # チャンク作成（ページ分割）
-        if split and chunk_pages and chunk_pages > 0:
-            chunks: List[str] = []
-            for start in range(0, len(page_texts), chunk_pages):
-                end = min(start + chunk_pages, len(page_texts))
-                chunk_text = "\n--- ページ区切り ---\n".join(page_texts[start:end])
-                chunks.append(chunk_text)
-        else:
-            chunks = ["\n--- ページ区切り ---\n".join(page_texts)]
-
         try:
             client = genai.Client(api_key=gemini_api_key)
         except Exception as e:
@@ -708,11 +726,33 @@ class BankManager:
 
         total_count = 0
 
-        for chunk_idx, chunk_text in enumerate(chunks, start=1):
-            chunk_prompt = prompt_template.format(text=chunk_text[:max_text_len])
+        if is_scan_pdf:
+            # スキャンPDF: ページ画像をGemini Visionに送信
+            vision_prompt = prompt_template.replace("{text}", "（画像から読み取ってください）")
+            chunks_data = []
+            for start in range(0, len(page_images), chunk_pages if split and chunk_pages else len(page_images)):
+                end = min(start + (chunk_pages if split and chunk_pages else len(page_images)), len(page_images))
+                chunks_data.append(page_images[start:end])
+        else:
+            # テキストPDF: テキストベースでチャンク作成
+            if split and chunk_pages and chunk_pages > 0:
+                chunks_data = []
+                for start in range(0, len(page_texts), chunk_pages):
+                    end = min(start + chunk_pages, len(page_texts))
+                    chunks_data.append("\n--- ページ区切り ---\n".join(page_texts[start:end]))
+            else:
+                chunks_data = ["\n--- ページ区切り ---\n".join(page_texts)]
+
+        for chunk_idx, chunk_data in enumerate(chunks_data, start=1):
+            if is_scan_pdf:
+                # 画像リスト → Gemini Vision
+                vision_prompt = prompt_template.replace("{text}", "（画像から読み取ってください）")
+                api_content = [vision_prompt] + list(chunk_data)
+            else:
+                api_content = prompt_template.format(text=chunk_data[:max_text_len])
 
             try:
-                response = call_gemini_with_retry(client, chunk_prompt)
+                response = call_gemini_with_retry(client, api_content)
                 result_text = response.text
             except Exception as e:
                 logger.error(f"チャンク {chunk_idx}: Gemini APIエラー: {e}")
@@ -1010,16 +1050,19 @@ class BankManager:
         if not gemini_api_key:
             return 0, ["Gemini APIキーが設定されていません"]
 
+        is_scan_pdf = False
+        page_images = []
         try:
             pdf = pdfplumber.open(BytesIO(file_bytes))
             page_texts = [page.extract_text() or "" for page in pdf.pages]
+            if not any(t.strip() for t in page_texts):
+                is_scan_pdf = True
+                for page in pdf.pages:
+                    page_images.append(page.to_image(resolution=200).original)
             pdf.close()
         except Exception as e:
             logger.error(f"PDF読み込みエラー: {e}")
             return 0, ["PDFの読み込みに失敗しました。ファイルを確認してください。"]
-
-        if not any(t.strip() for t in page_texts):
-            return 0, ["PDFからテキストを抽出できませんでした"]
 
         sign_instruction = "金額はクレジット支出なのでマイナス値にしてください" if is_credit_card else "入金はプラス、出金はマイナスで表してください"
 
@@ -1047,14 +1090,6 @@ class BankManager:
 - 年会費、手数料なども含めてください
 """
 
-        if split and chunk_pages > 0:
-            chunks = []
-            for start in range(0, len(page_texts), chunk_pages):
-                end = min(start + chunk_pages, len(page_texts))
-                chunks.append("\n--- ページ区切り ---\n".join(page_texts[start:end]))
-        else:
-            chunks = ["\n--- ページ区切り ---\n".join(page_texts)]
-
         try:
             client = genai.Client(api_key=gemini_api_key)
         except Exception as e:
@@ -1062,10 +1097,30 @@ class BankManager:
             return 0, ["Gemini APIの設定に失敗しました。APIキーを確認してください。"]
 
         total_count = 0
-        for chunk_idx, chunk_text in enumerate(chunks, start=1):
-            chunk_prompt = prompt_template.format(text=chunk_text[:8000])
+
+        if is_scan_pdf:
+            chunks_data = []
+            cp = chunk_pages if split and chunk_pages > 0 else len(page_images)
+            for start in range(0, len(page_images), cp):
+                end = min(start + cp, len(page_images))
+                chunks_data.append(("images", page_images[start:end]))
+        else:
+            if split and chunk_pages > 0:
+                chunks_data = []
+                for start in range(0, len(page_texts), chunk_pages):
+                    end = min(start + chunk_pages, len(page_texts))
+                    chunks_data.append(("text", "\n--- ページ区切り ---\n".join(page_texts[start:end])))
+            else:
+                chunks_data = [("text", "\n--- ページ区切り ---\n".join(page_texts))]
+
+        for chunk_idx, (chunk_type, chunk_content) in enumerate(chunks_data, start=1):
+            if chunk_type == "images":
+                vision_prompt = prompt_template.replace("{text}", "（画像から読み取ってください）")
+                api_content = [vision_prompt] + list(chunk_content)
+            else:
+                api_content = prompt_template.format(text=chunk_content[:8000])
             try:
-                response = call_gemini_with_retry(client, chunk_prompt)
+                response = call_gemini_with_retry(client, api_content)
                 result_text = response.text
             except Exception as e:
                 logger.error(f"チャンク {chunk_idx}: APIエラー: {e}")

@@ -3,7 +3,7 @@
 NotebookLM（Google Sheets）連携を想定した家計管理・分析アプリケーション。
 Streamlitベースのダッシュボードで、多角的なグラフ分析とAIアドバイス機能を提供。
 
-**Version 2.0.2**
+**Version 2.5.0**
 
 ## 特徴
 

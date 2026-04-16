@@ -705,7 +705,7 @@ Markdown形式で、見出しや箇条書きを使って読みやすくしてく
 
         try:
             client = genai.Client(api_key=api_key)
-            models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.0-flash-lite"]
+            models = ["gemini-2.5-flash", "gemini-2.5-flash-lite"]
             for model_name in models:
                 try:
                     response = call_gemini_with_retry(client, prompt, model_name=model_name)
@@ -717,7 +717,14 @@ Markdown形式で、見出しや箇条書きを使って読みやすくしてく
             return "[Gemini Error] 全モデルが一時的に利用不可です。しばらく待ってから再試行してください。"
         except Exception as e:
             logger.error(f"Gemini Error: {type(e).__name__}: {e}")
-            return "[Gemini Error] APIとの通信に失敗しました。再試行してください。"
+            err_msg = str(e)
+            if 'API_KEY_INVALID' in err_msg or '400' in err_msg:
+                return "[Gemini Error] APIキーが無効です。サイドバーで正しいキーを入力してください。"
+            elif '403' in err_msg or 'PERMISSION_DENIED' in err_msg:
+                return "[Gemini Error] APIキーの権限が不足しています。Google AI Studioで確認してください。"
+            elif '401' in err_msg or 'UNAUTHENTICATED' in err_msg:
+                return "[Gemini Error] APIキーが認証されませんでした。キーを再確認してください。"
+            return f"[Gemini Error] {type(e).__name__}: {e}"
 
     def generate_comprehensive_advice(
         self,
@@ -825,7 +832,7 @@ Markdown形式で、見出しや箇条書きを使って読みやすくしてく
             else:
                 contents = prompt
 
-            models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.0-flash-lite"]
+            models = ["gemini-2.5-flash", "gemini-2.5-flash-lite"]
             last_error = None
             for model_name in models:
                 try:
@@ -841,7 +848,14 @@ Markdown形式で、見出しや箇条書きを使って読みやすくしてく
             return "[Gemini Error] 全モデルが一時的に利用不可です。しばらく待ってから再試行してください。"
         except Exception as e:
             logger.error(f"Gemini Error: {type(e).__name__}: {e}")
-            return "[Gemini Error] APIとの通信に失敗しました。再試行してください。"
+            err_msg = str(e)
+            if 'API_KEY_INVALID' in err_msg or '400' in err_msg:
+                return "[Gemini Error] APIキーが無効です。サイドバーで正しいキーを入力してください。"
+            elif '403' in err_msg or 'PERMISSION_DENIED' in err_msg:
+                return "[Gemini Error] APIキーの権限が不足しています。Google AI Studioで確認してください。"
+            elif '401' in err_msg or 'UNAUTHENTICATED' in err_msg:
+                return "[Gemini Error] APIキーが認証されませんでした。キーを再確認してください。"
+            return f"[Gemini Error] {type(e).__name__}: {e}"
 
     def gemini_chat(
         self,
@@ -906,7 +920,7 @@ Markdown形式で、見出しや箇条書きを使って読みやすくしてく
 
         try:
             client = genai.Client(api_key=api_key)
-            models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.0-flash-lite"]
+            models = ["gemini-2.5-flash", "gemini-2.5-flash-lite"]
             last_err = None
             for model_name in models:
                 try:
@@ -922,7 +936,14 @@ Markdown形式で、見出しや箇条書きを使って読みやすくしてく
             return "[Gemini Error] 全モデルが利用制限に達しています。しばらく待ってから再試行してください。"
         except Exception as e:
             logger.error(f"Gemini Error: {type(e).__name__}: {e}")
-            return "[Gemini Error] APIとの通信に失敗しました。再試行してください。"
+            err_msg = str(e)
+            if 'API_KEY_INVALID' in err_msg or '400' in err_msg:
+                return "[Gemini Error] APIキーが無効です。サイドバーで正しいキーを入力してください。"
+            elif '403' in err_msg or 'PERMISSION_DENIED' in err_msg:
+                return "[Gemini Error] APIキーの権限が不足しています。Google AI Studioで確認してください。"
+            elif '401' in err_msg or 'UNAUTHENTICATED' in err_msg:
+                return "[Gemini Error] APIキーが認証されませんでした。キーを再確認してください。"
+            return f"[Gemini Error] {type(e).__name__}: {e}"
 
     def chat(
         self,

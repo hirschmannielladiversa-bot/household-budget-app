@@ -93,29 +93,65 @@ class ReceiptReader:
         self.model_name = model_name
         self.api_key = api_key
 
-    def read_receipt(self, image_bytes: bytes) -> Dict[str, Any]:
-        """画像からレシート情報を抽出
+    def read_receipt(self, file_bytes: bytes, filename: Optional[str] = None) -> Dict[str, Any]:
+        """画像またはPDFからレシート情報を抽出
 
         Args:
-            image_bytes: 画像のバイトデータ
+            file_bytes: 画像またはPDFのバイトデータ
+            filename: ファイル名（拡張子判定に使用。未指定時は先頭バイトでPDF判定）
 
         Returns:
             抽出された情報の辞書
         """
-        # 画像を開く
-        image = Image.open(io.BytesIO(image_bytes))
+        is_pdf = self._is_pdf(file_bytes, filename)
+
+        if is_pdf:
+            api_content = self._build_pdf_content(file_bytes)
+        else:
+            image = Image.open(io.BytesIO(file_bytes))
+            api_content = [self.SYSTEM_PROMPT, image]
 
         # Gemini APIで解析（リトライ付き）
-        response = call_gemini_with_retry(self.client, [
-            self.SYSTEM_PROMPT,
-            image
-        ], model_name=self.model_name)
+        response = call_gemini_with_retry(self.client, api_content, model_name=self.model_name)
 
         # レスポンステキストからJSONを抽出
         result = self._parse_response(response.text)
 
         # 結果を検証・補完
         return self.validate_result(result)
+
+    @staticmethod
+    def _is_pdf(file_bytes: bytes, filename: Optional[str]) -> bool:
+        """PDFかどうか判定（拡張子 + マジックバイト）"""
+        if filename and filename.lower().endswith(".pdf"):
+            return True
+        return file_bytes[:4] == b"%PDF"
+
+    def _build_pdf_content(self, pdf_bytes: bytes) -> list:
+        """PDF を Gemini API に渡せる形式に変換
+
+        テキスト抽出を試み、十分な長さなら text として渡す。
+        スキャンPDF等でテキストが取れない場合は各ページを画像化する。
+        """
+        try:
+            import pdfplumber
+        except ImportError as e:
+            raise ImportError(
+                "PDF を読み取るには pdfplumber が必要です。\n"
+                "pip install pdfplumber でインストールしてください。"
+            ) from e
+
+        with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
+            text = "\n".join(page.extract_text() or "" for page in pdf.pages).strip()
+            if len(text) > 50:
+                # テキストベースで解析
+                return [self.SYSTEM_PROMPT + "\n\n【レシート/明細書テキスト】\n" + text]
+            # スキャンPDF → 各ページを画像化して Vision に渡す
+            page_images = []
+            for pg in pdf.pages:
+                pg_img = pg.to_image(resolution=400)
+                page_images.append(pg_img.original)
+        return [self.SYSTEM_PROMPT] + page_images
 
     def _parse_response(self, text: str) -> Dict[str, Any]:
         """APIレスポンスからJSONを抽出

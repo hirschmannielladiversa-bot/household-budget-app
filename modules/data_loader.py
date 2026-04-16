@@ -11,7 +11,7 @@ class DataLoader:
     """CSV/Excelファイルからの家計データ読み込み"""
 
     REQUIRED_COLUMNS = ['日付', 'カテゴリ', '金額']
-    OPTIONAL_COLUMNS = ['メモ']
+    OPTIONAL_COLUMNS = ['メモ', '口座', '口座処理済']
 
     def __init__(self, config_path: Optional[str] = None, data_dir: Optional[str] = None):
         self.config_path = config_path or self._default_config_path()
@@ -110,6 +110,16 @@ class DataLoader:
         # メモ列のCSVインジェクション対策
         df['メモ'] = df['メモ'].apply(self._sanitize_cell)
 
+        # 口座連携列（オプション）
+        if '口座' not in df.columns:
+            df['口座'] = ''
+        else:
+            df['口座'] = df['口座'].fillna('').astype(str)
+        if '口座処理済' not in df.columns:
+            df['口座処理済'] = False
+        else:
+            df['口座処理済'] = df['口座処理済'].fillna(False).astype(bool)
+
         # 年月列を追加
         df['年月'] = df['日付'].dt.to_period('M')
         df['曜日'] = df['日付'].dt.day_name()
@@ -137,22 +147,38 @@ class DataLoader:
         return df
 
     def add_entry(self, df: pd.DataFrame, date, category: str,
-                  amount: float, memo: str = '') -> pd.DataFrame:
+                  amount: float, memo: str = '', account: str = '',
+                  account_processed: bool = False) -> pd.DataFrame:
         """エントリを追加"""
         new_entry = pd.DataFrame([{
             '日付': pd.to_datetime(date),
             'カテゴリ': category,
             '金額': amount,
-            'メモ': memo
+            'メモ': memo,
+            '口座': account,
+            '口座処理済': account_processed,
         }])
         new_entry['年月'] = new_entry['日付'].dt.to_period('M')
         new_entry['曜日'] = new_entry['日付'].dt.day_name()
+
+        # 既存 df に 口座系列が無い場合に備えて追加
+        if '口座' not in df.columns:
+            df = df.copy()
+            df['口座'] = ''
+        if '口座処理済' not in df.columns:
+            df = df.copy()
+            df['口座処理済'] = False
 
         return pd.concat([df, new_entry], ignore_index=True).sort_values('日付').reset_index(drop=True)
 
     def export_csv(self, df: pd.DataFrame, path: str) -> None:
         """CSVにエクスポート"""
-        export_df = df[['日付', 'カテゴリ', '金額', 'メモ']].copy()
+        cols = ['日付', 'カテゴリ', '金額', 'メモ']
+        if '口座' in df.columns:
+            cols.append('口座')
+        if '口座処理済' in df.columns:
+            cols.append('口座処理済')
+        export_df = df[cols].copy()
         export_df['日付'] = export_df['日付'].dt.strftime('%Y-%m-%d')
         export_df.to_csv(path, index=False, encoding='utf-8')
 
@@ -214,6 +240,11 @@ class DataLoader:
         if df is None or len(df) == 0:
             return b''
 
-        export_df = df[['日付', 'カテゴリ', '金額', 'メモ']].copy()
+        cols = ['日付', 'カテゴリ', '金額', 'メモ']
+        if '口座' in df.columns:
+            cols.append('口座')
+        if '口座処理済' in df.columns:
+            cols.append('口座処理済')
+        export_df = df[cols].copy()
         export_df['日付'] = export_df['日付'].dt.strftime('%Y-%m-%d')
         return export_df.to_csv(index=False, encoding='utf-8').encode('utf-8')

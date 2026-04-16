@@ -32,6 +32,9 @@ data/*.csv
 !data/sample_budget.csv
 !data/sample_assets.csv
 
+# Per-user personal data (transactions, saved expenses, accounts)
+data/users/
+
 # Personal financial data (JSON)
 data/user_profile.json
 data/profiles.json
