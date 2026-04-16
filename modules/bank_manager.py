@@ -420,13 +420,17 @@ class BankManager:
         """
         normalized_desc = self._normalize_for_matching(description)
 
-        # パターン側は __init__ で正規化済みなので直接比較
+        # 最長一致優先: 全パターンをチェックし、最も長くマッチしたパターンのカテゴリを採用
+        # 例: 「スーパースポーツゼビオ」→ 「スーパー」(食費)より「スーパースポーツゼビオ」(衣服)を優先
+        best_category = 'その他'
+        best_len = 0
         for category, normalized_patterns in self._NORMALIZED_PATTERNS:
             for normalized_pattern in normalized_patterns:
-                if normalized_pattern in normalized_desc:
-                    return category
+                if normalized_pattern in normalized_desc and len(normalized_pattern) > best_len:
+                    best_len = len(normalized_pattern)
+                    best_category = category
 
-        return 'その他'
+        return best_category
 
     def reclassify_transactions(self, only_other: bool = True) -> int:
         """取引のカテゴリを再分類（ベクトル化版）
@@ -712,7 +716,14 @@ class BankManager:
     ]
 }}
 
-注意:
+【重要なルール】:
+- 「利用金額」列に金額が記載されている行のみを取引として抽出すること
+- 金額がない行（補足情報・詳細行）は絶対にtransactionsに含めないこと
+- 以下は補足行の例であり、取引ではない:
+  * 「現地利用額 XX.XXX 変換レート YYY.YYY円」→ 外貨決済の為替詳細（スキップ）
+  * 「ダイサンケイヒン トウカンドウ エツ」→ ETCカードの走行経路（スキップ）
+  * これらは直前の取引行の補足であり、独立した取引ではない
+- 1つの取引が2行にまたがっている場合（本体行＋補足行）、金額のある本体行だけを1件の取引とすること
 - 日付が不完全な場合は推測してください
 - 金額は正の数値で（クレジットは出金として扱います）
 - 年会費、分割手数料なども取引として含めてください
@@ -920,6 +931,14 @@ class BankManager:
         }}
     ]
 }}
+
+【重要なルール】:
+- 「利用金額」列に金額が記載されている行のみを取引として抽出すること
+- 金額がない行（補足情報・詳細行）は絶対にtransactionsに含めないこと
+- 以下は補足行の例であり、取引ではない:
+  * 「現地利用額 XX.XXX 変換レート YYY.YYY円」→ 外貨決済の為替詳細（スキップ）
+  * 「ダイサンケイヒン トウカンドウ エツ」→ ETCカードの走行経路（スキップ）
+- 1つの取引が2行にまたがっている場合、金額のある本体行だけを1件の取引とすること
 
 注意:
 - {sign_instruction}
