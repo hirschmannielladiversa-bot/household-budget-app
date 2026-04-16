@@ -659,17 +659,6 @@ def show_overview_tab(analyzer: BudgetAnalyzer, visualizer: BudgetVisualizer) ->
 
     df = analyzer.df
 
-    if df.empty:
-        st.info(
-            "まだ支出データがありません。\n\n"
-            "**「💳 支出管理」タブ** からデータを取り込むか、手入力で数件登録してみてください。\n\n"
-            "- 📷 画像・PDF読み取り — レシート写真やPDFから自動入力\n"
-            "- 📥 CSV・Excel取り込み — 銀行の明細ファイルを取り込み\n"
-            "- ✏️ 手入力 — 1件ずつ入力\n\n"
-            "「💰 収入管理」タブや「🏦 資産・税金・保険」タブも、"
-            "データがなくても使い始められます。"
-        )
-
     # --- 年度フィルタ ---
     current_year = datetime.now().year
     current_month = datetime.now().month
@@ -6134,10 +6123,11 @@ def main() -> None:
 
     df: Optional[pd.DataFrame] = st.session_state.df
 
-    # データがない場合は空DataFrameで全タブを表示（データ入力を可能にするため）
+    # データがない場合は空DataFrameで代替（全タブを常に表示するため）
     loader: DataLoader = st.session_state.data_loader
     if df is None or df.empty:
         df = loader.create_empty_dataframe()
+    has_data = len(df) > 0
 
     # メイン分析オブジェクト
     analyzer = BudgetAnalyzer(df, loader.get_ideal_ratios())
@@ -6159,7 +6149,18 @@ def main() -> None:
     tabs = st.tabs(["📋 概要", "💰 収入管理", "💳 支出管理", "🏦 資産・税金・保険", "🧭 アドバイス"])
 
     with tabs[0]:
-        show_overview_tab(analyzer, visualizer)
+        if has_data:
+            show_overview_tab(analyzer, visualizer)
+        else:
+            st.info(
+                "まだ支出データがありません。\n\n"
+                "**「💳 支出管理」タブ** からデータを取り込むか、手入力で登録してみてください。\n\n"
+                "- 📷 画像・PDF読み取り — レシート写真やPDFから自動入力\n"
+                "- 📥 CSV・Excel取り込み — 銀行の明細ファイルを取り込み\n"
+                "- ✏️ 手入力 — 1件ずつ入力\n\n"
+                "「💰 収入管理」タブや「🏦 資産・税金・保険」タブも、"
+                "データがなくても使い始められます。"
+            )
 
     with tabs[1]:
         show_income_tab(analyzer)
@@ -6171,7 +6172,10 @@ def main() -> None:
         show_assets_tax_tab()
 
     with tabs[4]:
-        show_advice_tab(analyzer, advisor)
+        if has_data:
+            show_advice_tab(analyzer, advisor)
+        else:
+            st.info("支出データを入力すると、AIアドバイスや家計診断が利用できるようになります。")
 
 
 if __name__ == "__main__":
