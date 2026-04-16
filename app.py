@@ -1711,11 +1711,11 @@ def show_income_tab(analyzer: BudgetAnalyzer) -> None:
       "income_tax": 所得税（源泉徴収税額）,
       "resident_tax": 住民税,
       "other_deduction": その他の控除合計（財形貯蓄は含めない）,
-      "take_home": 差引支給額（差引受取額）,
-      "account_1_name": "第1口座の振込先金融機関名（共済支部名など）",
-      "account_1_amount": 第1口座振込額,
-      "account_2_name": "第2口座の振込先金融機関名",
-      "account_2_amount": 第2口座振込額,
+      "take_home": 差引支給額（＝手取り。差引受取額とも呼ばれる。総支給額から控除合計を引いた金額）,
+      "account_1_name": "第1口座の振込先金融機関名（共済支部名など。記載がなければ空文字）",
+      "account_1_amount": 第1口座振込額（記載がなければ0。第1・第2口座の記載がない場合、差引支給額と同額にしてください）,
+      "account_2_name": "第2口座の振込先金融機関名（記載がなければ空文字）",
+      "account_2_amount": 第2口座振込額（記載がなければ0）,
       "account_3_name": "第3口座の金融機関名",
       "account_3_amount": 第3口座への振込金額,
       "zaikei_general": 一般財形貯蓄の金額（該当なしは0）,
@@ -1843,6 +1843,15 @@ def show_income_tab(analyzer: BudgetAnalyzer) -> None:
                             if (_r_hi + _r_pi + _r_ei) == 0 and _r_si_total > 0:
                                 # Gemini が内訳を返さなかった古い/簡易フォーマット → 合計のみ健保欄に入れる
                                 _r_hi = _r_si_total
+                            _r_take_home = int(r.get("take_home", 0))
+                            _r_a1 = int(r.get("account_1_amount", 0))
+                            _r_a2 = int(r.get("account_2_amount", 0))
+                            _r_zk = int(r.get("zaikei_general", 0)) + int(r.get("zaikei_pension", 0)) + int(r.get("zaikei_housing", 0))
+                            # 口座振込額が未記載の場合、手取り全額を第1口座に入れる
+                            if _r_a1 == 0 and _r_a2 == 0 and _r_take_home > 0:
+                                _r_a1 = _r_take_home
+                            # 手取り: take_home（差引支給額）を優先。なければ口座合計+財形で算出
+                            _r_hand = _r_take_home if _r_take_home > 0 else (_r_a1 + _r_a2 + _r_zk)
                             edit_rows.append({
                                 "反映": True,
                                 "種別": type_label,
@@ -1856,10 +1865,10 @@ def show_income_tab(analyzer: BudgetAnalyzer) -> None:
                                 "所得税": int(r.get("income_tax", 0)),
                                 "住民税": int(r.get("resident_tax", 0)),
                                 "他控除": int(r.get("other_deduction", 0)),
-                                "第1口座": (_r_a1 := int(r.get("account_1_amount", 0))),
-                                "第2口座": (_r_a2 := int(r.get("account_2_amount", 0))),
-                                "財形": (_r_zk := int(r.get("zaikei_general", 0)) + int(r.get("zaikei_pension", 0)) + int(r.get("zaikei_housing", 0))),
-                                "手取り": _r_a1 + _r_a2 + _r_zk,
+                                "第1口座": _r_a1,
+                                "第2口座": _r_a2,
+                                "財形": _r_zk,
+                                "手取り": _r_hand,
                             })
                         edit_df = pd.DataFrame(edit_rows)
                         edited = st.data_editor(
@@ -2125,7 +2134,7 @@ def show_income_tab(analyzer: BudgetAnalyzer) -> None:
                 "第1口座": a1_amount,
                 "第2口座": a2_amount,
                 "財形": zaikei,
-                "手取り": a1_amount + a2_amount + zaikei,
+                "手取り": th if th > 0 else (a1_amount + a2_amount + zaikei),
             })
             row_keys.append(key)
 
