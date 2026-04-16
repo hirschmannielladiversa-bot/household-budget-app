@@ -1,0 +1,8 @@
+asset_id,asset_type,name,purchase_date,purchase_price,current_value,details
+A001,vehicle,ヤリス,2023-05-10,2150000,1850000,"{""cc"": 1500, ""weight_kg"": 1050, ""color"": ""ブルー"", ""model_year"": 2023}"
+A002,financial,普通預金,2020-04-01,2000000,2000000,"{""bank"": ""三菱UFJ銀行"", ""account_type"": ""普通"", ""branch"": ""新宿支店""}"
+A003,financial,つみたてNISA,2022-01-15,1200000,1580000,"{""fund_name"": ""eMAXIS Slim 全世界株式"", ""units"": 600, ""fund_type"": ""投資信託"", ""category"": ""全世界株式""}"
+A004,financial,iDeCo,2021-06-01,840000,1020000,"{""fund_name"": ""SBI全世界株式"", ""units"": 400, ""fund_type"": ""確定拠出年金"", ""category"": ""全世界株式""}"
+A005,financial,定期預金,2024-01-10,1000000,1005000,"{""bank"": ""楽天銀行"", ""account_type"": ""定期"", ""interest_rate"": 0.5, ""maturity_date"": ""2025-01-10""}"
+A006,financial,ソニーグループ株式,2023-03-20,350000,420000,"{""ticker"": ""6758"", ""shares"": 100, ""exchange"": ""東証プライム"", ""sector"": ""電気機器""}"
+A007,vehicle,電動アシスト自転車,2024-06-15,150000,130000,"{""brand"": ""ブリヂストン"", ""model"": ""アシスタU STD"", ""battery_capacity"": ""12Ah"", ""color"": ""ホワイト""}"

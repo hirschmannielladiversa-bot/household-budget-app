@@ -659,6 +659,17 @@ def show_overview_tab(analyzer: BudgetAnalyzer, visualizer: BudgetVisualizer) ->
 
     df = analyzer.df
 
+    if df.empty:
+        st.info(
+            "まだ支出データがありません。\n\n"
+            "**「💳 支出管理」タブ** からデータを取り込むか、手入力で数件登録してみてください。\n\n"
+            "- 📷 画像・PDF読み取り — レシート写真やPDFから自動入力\n"
+            "- 📥 CSV・Excel取り込み — 銀行の明細ファイルを取り込み\n"
+            "- ✏️ 手入力 — 1件ずつ入力\n\n"
+            "「💰 収入管理」タブや「🏦 資産・税金・保険」タブも、"
+            "データがなくても使い始められます。"
+        )
+
     # --- 年度フィルタ ---
     current_year = datetime.now().year
     current_month = datetime.now().month
@@ -5967,6 +5978,13 @@ def load_profiles() -> list:
     if PROFILES_PATH.exists():
         with open(PROFILES_PATH, 'r', encoding='utf-8') as f:
             return json.load(f)
+    # profiles.json が未作成 → テンプレートがあればコピーして使う
+    template_path = PROFILES_PATH.parent / "profiles_template.json"
+    if template_path.exists():
+        import shutil
+        shutil.copy2(template_path, PROFILES_PATH)
+        with open(PROFILES_PATH, 'r', encoding='utf-8') as f:
+            return json.load(f)
     return [{"id": "default", "name": "自分のデータ", "data_dir": "data", "description": ""}]
 
 
@@ -6116,19 +6134,12 @@ def main() -> None:
 
     df: Optional[pd.DataFrame] = st.session_state.df
 
+    # データがない場合は空DataFrameで全タブを表示（データ入力を可能にするため）
+    loader: DataLoader = st.session_state.data_loader
     if df is None or df.empty:
-        st.info(
-            "「💳 支出管理」タブからデータを取り込むか、"
-            "手入力で数件登録してください。"
-        )
-        st.markdown(
-            "- データ形式は `日付, カテゴリ, 金額, メモ` の 4 列を基本とします。\n"
-            "- NotebookLM と連携する場合は、`templates/google_sheets_template.md` を参照してください。"
-        )
-        return
+        df = loader.create_empty_dataframe()
 
     # メイン分析オブジェクト
-    loader: DataLoader = st.session_state.data_loader
     analyzer = BudgetAnalyzer(df, loader.get_ideal_ratios())
     visualizer = BudgetVisualizer(analyzer)
     advisor = FinancialAdvisor(

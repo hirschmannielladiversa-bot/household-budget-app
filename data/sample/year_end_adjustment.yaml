@@ -1,0 +1,34 @@
+deductions:
+  dependents:
+  - income: 800000
+    name: 山田花
+    relationship: 配偶者
+  earthquake_insurance: 15000
+  furusato_nouzei:
+    total_donation: 50000
+    use_one_stop: true
+  housing_loan:
+    balance: 20000000
+    rate: 0.007000000000000001
+  life_insurance:
+    general: 50000
+    medical: 30000
+    pension: 40000
+  life_insurance_deduction: 50000
+  medical_expense:
+    insurance_reimbursement: 0
+    self_medication: 0
+    total: 85000
+    use_self_medication: false
+  small_enterprise: 0
+  social_insurance: 0
+  spouse:
+    applicable: true
+    income: 800000
+monthly_data:
+- bonus: 0
+  month: 12
+  salary: 4500000
+  social_insurance: 720000
+  withheld_tax: 180000
+year: 2025

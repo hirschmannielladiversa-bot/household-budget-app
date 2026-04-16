@@ -1,0 +1,14 @@
+[
+  {
+    "id": "default",
+    "name": "自分のデータ",
+    "data_dir": "data",
+    "description": ""
+  },
+  {
+    "id": "sample",
+    "name": "サンプル（山田太郎）",
+    "data_dir": "data/sample",
+    "description": "デモ用サンプルデータ（架空）"
+  }
+]

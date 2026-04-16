@@ -1,0 +1,73 @@
+{
+  "insurance_list": [
+    {
+      "name": "アフラック 医療保険EVER",
+      "type": "掛け捨て",
+      "annual": 42000,
+      "value": 0,
+      "currency": "円",
+      "annual_usd": 0,
+      "value_usd": 0
+    },
+    {
+      "name": "損保ジャパン 自動車保険",
+      "type": "掛け捨て",
+      "annual": 50400,
+      "value": 0,
+      "currency": "円",
+      "annual_usd": 0,
+      "value_usd": 0
+    },
+    {
+      "name": "明治安田生命 つみたて学資",
+      "type": "貯蓄型",
+      "annual": 180000,
+      "value": 1620000,
+      "currency": "円",
+      "annual_usd": 0,
+      "value_usd": 0
+    }
+  ],
+  "financial_assets": [
+    {
+      "name": "iDeCo",
+      "type": "確定拠出年金（iDeCo）",
+      "current_value": 1020000
+    }
+  ],
+  "furusato_donations": [
+    {
+      "date": "2026-02-20",
+      "municipality": "北海道紋別市",
+      "amount": 15000,
+      "return_item": "ホタテ",
+      "one_stop_submitted": true
+    },
+    {
+      "date": "2026-03-10",
+      "municipality": "佐賀県上峰町",
+      "amount": 10000,
+      "return_item": "さがびより米5kg",
+      "one_stop_submitted": true
+    },
+    {
+      "date": "2026-03-15",
+      "municipality": "大阪府泉佐野市",
+      "amount": 25000,
+      "return_item": "タオルセット",
+      "one_stop_submitted": false
+    }
+  ],
+  "usd_rate": 155.0,
+  "total_income": 0,
+  "monthly_income": 320000.0,
+  "budget": 250000.0,
+  "annual_income": 4500000,
+  "savings_deposit": 0,
+  "income_account_1_id": "",
+  "income_account_1_name": "",
+  "income_account_2_id": "",
+  "income_account_2_name": "",
+  "income_account_3_id": "",
+  "income_account_3_name": ""
+}

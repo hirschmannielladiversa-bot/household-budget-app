@@ -70,8 +70,9 @@ pdf_splitter.py
 modules/pdf_splitter.py
 家計アプリ起動.command
 
-# Sample/backup subdirectories (sample_budget.csv and sample_assets.csv are kept at data/ level)
-data/sample/
+# Sample user data (tracked for distribution — fictional 山田太郎)
+!data/sample/
+data/sample/.salt
 
 # Personal data (YAML)
 data/year_end_adjustment.yaml
