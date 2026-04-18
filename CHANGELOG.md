@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
+## [2.5.1] — 2026-04-18
+
+**Windows 実機検証 + カテゴリ追加 + 防御的型変換フィックス**
+
+### Added
+- カテゴリ設定 (`config/categories.yaml`) に「IT費」「雑費」を追加
+  - IT費: Adobe / ソフトウェア / クラウドストレージ (ideal_ratio 0.02)
+  - 雑費: 振込手数料 / 手数料 / 振込 / その他 (ideal_ratio 0.00)
+- 給与明細読み取りタブに「手取り (差引支給額)」の表示を追加 (読み取り直後の確認を容易化)
+- 給与明細読み取りタブに「🔍 AI読み取り生データ (トラブルシュート用)」expander を追加
+- `.streamlit/config.toml` に Windows 環境向けチューニングを統合 (`headless = true`, `fileWatcherType = "none"`, `runOnSave = false`, `gatherUsageStats = false`)
+
+### Fixed
+- `modules/analyzer.py` の `BudgetAnalyzer.__init__` に `'金額'` 列の `pd.to_numeric(..., errors='coerce').fillna(0)` を追加
+  - 文字列混入・NaN 含有で発生していた集計エラーを防御的に解消
+  - Windows 実機で発現した型周りの挙動差を吸収
+
+### Verified
+- Windows 10/11 実機で v2.5.0 配布物の起動・レシート PDF 読み取り・HTML 使い方ガイド表示まで一連の動作確認完了
+
 ## [2.5.0] — 2026-04-16
 
 **レシート読み取りの PDF 対応 + data_editor 編集不可バグ修正**

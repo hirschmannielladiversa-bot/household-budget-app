@@ -11,6 +11,8 @@ class BudgetAnalyzer:
 
     def __init__(self, df: pd.DataFrame, ideal_ratios: Optional[Dict[str, float]] = None):
         self.df = df.copy()
+        if '金額' in self.df.columns:
+            self.df['金額'] = pd.to_numeric(self.df['金額'], errors='coerce').fillna(0)
         if '日付' in self.df.columns:
             if '年月' not in self.df.columns:
                 self.df['年月'] = pd.to_datetime(self.df['日付']).dt.to_period('M')

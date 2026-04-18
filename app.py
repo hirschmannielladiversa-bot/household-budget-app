@@ -1823,6 +1823,8 @@ def show_income_tab(analyzer: BudgetAnalyzer) -> None:
                             a1a = int(r.get("account_1_amount", 0))
                             a2n = r.get("account_2_name", "")
                             a2a = int(r.get("account_2_amount", 0))
+                            _th_raw = r.get("take_home", 0)
+                            info_parts.append(f"手取り(差引支給額): ¥{int(_th_raw):,}")
                             if a1n: info_parts.append(f"{a1n}: ¥{a1a:,}")
                             if a2n: info_parts.append(f"{a2n}: ¥{a2a:,}")
                             if dt == "year_end_adjustment":
@@ -1830,6 +1832,11 @@ def show_income_tab(analyzer: BudgetAnalyzer) -> None:
                                 if refund != 0:
                                     info_parts.append(f"還付金: ¥{refund:,}" if refund > 0 else f"不足額: ¥{abs(refund):,}")
                             st.info(" / ".join(info_parts))
+
+                        # デバッグ: Gemini生データ確認用
+                        with st.expander("🔍 AI読み取り生データ（トラブルシュート用）", expanded=False):
+                            for r in ok_results:
+                                st.json({k: v for k, v in r.items() if not k.startswith("_")})
 
                         edit_rows = []
                         for r in ok_results:

@@ -110,6 +110,14 @@ categories:
       - iDeCo
     ideal_ratio: 0.10
 
+  IT費:
+    icon: "💻"
+    subcategories:
+      - Adobe
+      - ソフトウェア
+      - クラウドストレージ
+    ideal_ratio: 0.02
+
   AI費:
     icon: "🤖"
     subcategories:
@@ -141,13 +149,21 @@ categories:
       - ガソリン
     ideal_ratio: 0.00
 
+  雑費:
+    icon: "📦"
+    subcategories:
+      - 振込手数料
+      - 手数料
+      - 振込
+      - その他
+    ideal_ratio: 0.03
+
   その他:
     icon: "📦"
     subcategories:
-      - 雑費
       - 交際費
       - 寄付
-    ideal_ratio: 0.05
+    ideal_ratio: 0.02
 
 # 貯蓄目標（収入に対する比率）
 savings_target: 0.20
