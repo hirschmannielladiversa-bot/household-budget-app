@@ -50,7 +50,7 @@
 <div class="header">
   <h1>🏠 家計管理アプリ 開発ログ</h1>
   <p>Claude Code によるプロンプト駆動開発の全記録</p>
-  <p style="margin-top:4px;font-size:0.85em;">Version 1.0 → 2.0.0 | 2026-03-07 〜 2026-04-03</p>
+  <p style="margin-top:4px;font-size:0.85em;">Version 1.0 → 2.5.1 | 2026-03-07 〜 2026-04-18</p>
 </div>
 
 <div class="container">
@@ -236,7 +236,7 @@
     </div>
     <div class="result">
       <div class="result-label">✅ 結果</div>
-      <div class="result-text">categories.yaml、bank_formats.yaml、app.pyに「ふるさと納税」カテゴリ追加。福岡県飯塚市等のデータを自動分類。</div>
+      <div class="result-text">categories.yaml、bank_formats.yaml、app.pyに「ふるさと納税」カテゴリ追加。自治体名を含む取引を自動分類。</div>
     </div>
     <span class="tag tag-feature">機能追加</span>
 
@@ -404,20 +404,235 @@
   </div>
 </div>
 
+<!-- Phase 11: v2.0.2 -->
+<div class="phase">
+  <div class="phase-header">
+    <h2>Phase 11: Windows 対応・パフォーマンス改善 (v2.0.2)</h2>
+    <span class="phase-date">2026-04-10</span>
+  </div>
+  <div class="phase-body">
+    <p class="note">Mac 先行開発だった Phase 10 までを Windows でも動かすため、起動手順・パス処理・依存パッケージを整理した節目のリリース。</p>
+
+    <div class="prompt">
+      <div class="prompt-label">📝 プロンプト (要約)</div>
+      <div class="prompt-text">Windows でも Mac と同じ手順で起動できるようにしたい。あと重いから一部処理を軽くしてほしい。Gemini SDK も最新版で動く？</div>
+    </div>
+    <div class="result">
+      <div class="result-label">✅ 結果</div>
+      <div class="result-text">
+        <strong>起動手順:</strong> Windows 用 <span class="files">家計アプリ起動.bat</span> を新規作成。Mac の <span class="files">.command</span> と 1:1 対応<br>
+        <strong>パフォーマンス:</strong> グラフ生成の重複計算を削減、セッション間キャッシュ対象を見直し<br>
+        <strong>Gemini SDK:</strong> 旧 API → 新 SDK に移行、モデル名もまとめて更新<br>
+        配布パッケージを Mac / Windows の 2 系統に分離
+      </div>
+    </div>
+    <span class="tag tag-feature">OS対応</span>
+    <span class="tag tag-fix">パフォーマンス</span>
+  </div>
+</div>
+
+<!-- Phase 12: v2.3.0 / v2.3.1 -->
+<div class="phase">
+  <div class="phase-header">
+    <h2>Phase 12: 口座連携強化・多角的分析 (v2.3.0 / v2.3.1)</h2>
+    <span class="phase-date">2026-04-15</span>
+  </div>
+  <div class="phase-body">
+    <p class="note">家計簿の表示をサマリ偏重から「複数視点」に切り替えた大型改修。同日に macOS Sequoia でブロックされない起動手順ガイドも追加 (v2.3.1)。</p>
+
+    <div class="prompt">
+      <div class="prompt-label">📝 プロンプト #30 (口座連携の強化)</div>
+      <div class="prompt-text">口座の残高推移と、支出カテゴリの関係を一画面で見たい。どの口座から何にお金が出ているか追えるようにしてほしい。</div>
+    </div>
+    <div class="result">
+      <div class="result-label">✅ 結果</div>
+      <div class="result-text">
+        口座ごとの残高推移グラフ、口座 × カテゴリのクロス集計表、口座別の月次収支パネルを追加。<br>
+        data_editor 経由で取引の口座を後から付け直せる UI も実装。
+      </div>
+    </div>
+
+    <div class="prompt">
+      <div class="prompt-label">📝 プロンプト #31 (多角的分析ダッシュボード)</div>
+      <div class="prompt-text">月単位・週単位・曜日単位で支出パターンを比較したい。固定費と変動費も分けて見られるようにして。</div>
+    </div>
+    <div class="result">
+      <div class="result-label">✅ 結果</div>
+      <div class="result-text">
+        週別・曜日別ヒートマップ、固定費/変動費の切り分け、年度横並び比較を新ダッシュボードとしてまとめて提供。
+      </div>
+    </div>
+
+    <div class="prompt">
+      <div class="prompt-label">📝 プロンプト #32 (macOS Sequoia 対応)</div>
+      <div class="prompt-text">Sequoia で <span class="files">.command</span> をダブルクリックすると Gatekeeper で止まる。最初はターミナルから起動させる手順に変えてほしい。</div>
+    </div>
+    <div class="result">
+      <div class="result-label">✅ 結果</div>
+      <div class="result-text">
+        はじめにお読みください.md と 使い方ガイド.html を全面書き換え。<br>
+        「初回はターミナル」→「2回目以降はダブルクリック」の 2 ステップに再整理。
+      </div>
+    </div>
+    <span class="tag tag-new">機能追加</span>
+    <span class="tag tag-feature">UX改善</span>
+  </div>
+</div>
+
+<!-- Phase 13: v2.4.0 -->
+<div class="phase">
+  <div class="phase-header">
+    <h2>Phase 13: 給与明細 PDF から社会保険料の内訳展開 (v2.4.0)</h2>
+    <span class="phase-date">2026-04-15</span>
+  </div>
+  <div class="phase-body">
+    <p class="note">従来は「社会保険料」を 1 行でしか持っていなかった給与明細データを、健康保険 / 厚生年金 / 雇用保険の 3 項目に分解。手取り計算ルールも明文化した。</p>
+
+    <div class="prompt">
+      <div class="prompt-label">📝 プロンプト #33</div>
+      <div class="prompt-text">給与明細 PDF から読み取った社会保険料を、健康保険・厚生年金・雇用保険に分けて管理したい。合計は自動計算で。</div>
+    </div>
+    <div class="result">
+      <div class="result-label">✅ 結果</div>
+      <div class="result-text">
+        <strong>Gemini プロンプト:</strong> health_insurance / pension_insurance / employment_insurance フィールドを追加<br>
+        <strong>表示:</strong> 読み取り結果テーブルの「社保」列を 3 列に分割。合計は常に 3 項目の和として再計算 (手動編集も可)<br>
+        <strong>data スキーマ:</strong> income_data[ym].deductions に 3 キーを追加。従来の social_insurance も互換性維持のため残存<br>
+        <strong>手取り定義:</strong> 手取り = 差引支給額 = 支給額合計 − (健康保険+厚生年金+雇用保険+所得税+住民税+他控除)。README / CHANGELOG に明文化
+      </div>
+    </div>
+    <span class="tag tag-feature">機能追加</span>
+  </div>
+</div>
+
+<!-- Phase 14: v2.5.0 -->
+<div class="phase">
+  <div class="phase-header">
+    <h2>Phase 14: レシート読み取り PDF 対応 + data_editor 編集不可バグ修正 (v2.5.0)</h2>
+    <span class="phase-date">2026-04-16</span>
+  </div>
+  <div class="phase-body">
+    <p class="note">写真しか扱えなかったレシート読み取りを電子レシート PDF にも広げ、同時に見えていなかった Streamlit の format 指定バグを潰したリリース。</p>
+
+    <div class="prompt">
+      <div class="prompt-label">📝 プロンプト #34 (レシート PDF 対応)</div>
+      <div class="prompt-text">電子レシートや Amazon 注文確認の PDF を、レシート読み取りと同じ流れで取り込みたい。</div>
+    </div>
+    <div class="result">
+      <div class="result-label">✅ 結果</div>
+      <div class="result-text">
+        <span class="files">modules/receipt_reader.py</span> の <code>read_receipt(file_bytes, filename=None)</code> を拡張。拡張子とマジックバイト (%PDF) で PDF / 画像を自動判定。<br>
+        PDF 処理は給与明細 PDF と同じ二段構え: pdfplumber でテキスト抽出 → 50 文字以下なら各ページを 400dpi で画像化し Gemini Vision にフォールバック。<br>
+        app.py の file_uploader に pdf 型追加、PDF はファイル名表示に切替。<span class="files">requirements.txt</span> に pdfplumber を明示追加。
+      </div>
+    </div>
+
+    <div class="prompt">
+      <div class="prompt-label">📝 プロンプト #35 (data_editor 編集不可バグ)</div>
+      <div class="prompt-text">支出テーブルが読み取り専用になっていて編集できない。エラーは出ないけど入力できない。</div>
+    </div>
+    <div class="result">
+      <div class="result-label">✅ 結果</div>
+      <div class="result-text">
+        <strong>根本原因:</strong> <code>NumberColumn(format="¥%,d")</code> が Streamlit の sprintf パーサで拒否され、エラーは出さず data_editor 全体を read-only に落としていた (%,d は printf 非対応)。<br>
+        <strong>対処:</strong> <code>¥%,d → ¥%d</code> 一括置換 (3 ファイル × 33 箇所)。実機検証済み。
+      </div>
+    </div>
+
+    <div class="prompt">
+      <div class="prompt-label">📝 プロンプト #36 (使い方ガイドの視覚化)</div>
+      <div class="prompt-text">v2.5.0 の新機能をガイドに反映。どこのタブにアップローダーが増えたかを図で見せたい。</div>
+    </div>
+    <div class="result">
+      <div class="result-label">✅ 結果</div>
+      <div class="result-text">
+        使い方ガイド.html にタブ配置・アップロードエリア・読み取り結果テーブルの CSS モックアップを追加。対応 PDF の具体例 (電子レシート・注文確認・チケット) もリスト化。
+      </div>
+    </div>
+    <span class="tag tag-new">機能追加</span>
+    <span class="tag tag-fix">バグ修正</span>
+  </div>
+</div>
+
+<!-- Phase 15: v2.5.1 -->
+<div class="phase">
+  <div class="phase-header">
+    <h2>Phase 15: Windows 実機検証 + カテゴリ追加 + 防御的型変換 (v2.5.1)</h2>
+    <span class="phase-date">2026-04-18</span>
+  </div>
+  <div class="phase-body">
+    <p class="note">v2.5.0 の配布 zip を Windows 実機で端から動作検証。そこで出た挙動差を防御的に吸収し、あわせて長期運用で足りないと分かったカテゴリ 2 種を追加。</p>
+
+    <div class="prompt">
+      <div class="prompt-label">📝 プロンプト #37 (Windows 実機検証の反映)</div>
+      <div class="prompt-text">Windows 10/11 で配布 zip の起動・レシート PDF 読み取り・HTML 表示を一通り試した。気になった所を本体に反映して v2.5.1 として出したい。</div>
+    </div>
+    <div class="result">
+      <div class="result-label">✅ 結果</div>
+      <div class="result-text">
+        <strong>.streamlit/config.toml:</strong> Windows 検証で確定したチューニングを統合 (<code>headless = true</code> / <code>fileWatcherType = "none"</code> / <code>runOnSave = false</code> / <code>gatherUsageStats = false</code>)<br>
+        <strong>サイドバーのレシート読み取り:</strong> PDF 対応を削除し画像のみに限定。PDF はメインタブの「📷 画像・PDF読み取り」に集約<br>
+        <strong>使い方ガイド.html:</strong> 「サイドバー版でも PDF が使える」という誤った誘導を削除
+      </div>
+    </div>
+
+    <div class="prompt">
+      <div class="prompt-label">📝 プロンプト #38 (金額列の防御的型変換)</div>
+      <div class="prompt-text">ある Excel を取り込んだら集計でエラーになった。金額列に文字が混ざっているとダメなのでコードで吸収してほしい。</div>
+    </div>
+    <div class="result">
+      <div class="result-label">✅ 結果</div>
+      <div class="result-text">
+        <span class="files">modules/analyzer.py</span> の <code>BudgetAnalyzer.__init__</code> に <code>pd.to_numeric('金額', errors='coerce').fillna(0)</code> を追加。<br>
+        文字列混入 / NaN による集計エラーを防御。Windows 実機で顕在化していた型の挙動差を吸収。
+      </div>
+    </div>
+
+    <div class="prompt">
+      <div class="prompt-label">📝 プロンプト #39 (カテゴリ追加 & 給与明細 UI)</div>
+      <div class="prompt-text">サブスクと振込手数料を別枠で追いたい。あと給与明細を読み取った直後にパッと手取りを確認したい。</div>
+    </div>
+    <div class="result">
+      <div class="result-label">✅ 結果</div>
+      <div class="result-text">
+        <strong>カテゴリ追加:</strong> <span class="files">config/categories.yaml</span> に「IT費」(Adobe / ソフトウェア / クラウドストレージ) と「雑費」(振込手数料 / 手数料 / 振込 / その他) を追加<br>
+        <strong>給与明細タブ:</strong> 「手取り (差引支給額)」表示と、AI 生データの expander (トラブルシュート用) を追加
+      </div>
+    </div>
+
+    <div class="prompt">
+      <div class="prompt-label">📝 プロンプト #40 (過去 Release の整理と配布物の整頓)</div>
+      <div class="prompt-text">旧バージョンの Release を一覧から隠したい。templates/ フォルダと 開始はこのフォルダ/ の中身が被っているので統合してほしい。Excel は「Excelのデータ例」としてサンプル行付きで残す。</div>
+    </div>
+    <div class="result">
+      <div class="result-label">✅ 結果</div>
+      <div class="result-text">
+        <strong>GitHub Releases:</strong> v2.5.1 以外を Draft 化 (情報は保持、一般ビューから非表示)<br>
+        <strong>配布物の整理:</strong> <span class="files">templates/</span> フォルダを削除し、サンプル Excel を日本語ヘッダ + 15 件のダミーデータ付きで <span class="files">開始はこのフォルダ/Excelのデータ例.xlsx</span> に集約
+      </div>
+    </div>
+    <span class="tag tag-fix">バグ修正</span>
+    <span class="tag tag-feature">UX改善</span>
+    <span class="tag tag-new">機能追加</span>
+  </div>
+</div>
+
 <!-- 統計 -->
 <div class="summary">
   <h3>📊 開発統計</h3>
   <table>
     <tr><th>項目</th><th>数値</th></tr>
-    <tr><td>開発期間</td><td>2026-03-07 〜 2026-04-03（約1ヶ月）</td></tr>
-    <tr><td>フェーズ数</td><td>10フェーズ</td></tr>
-    <tr><td>本セッションのプロンプト数</td><td>約25回</td></tr>
+    <tr><td>開発期間</td><td>2026-03-07 〜 2026-04-18（約1.5ヶ月）</td></tr>
+    <tr><td>フェーズ数</td><td>15フェーズ</td></tr>
+    <tr><td>GitHub リリース数</td><td>v2.0.0 〜 v2.5.1（計9タグ）</td></tr>
+    <tr><td>本ログに記録したプロンプト数</td><td>約40回</td></tr>
     <tr><td>セキュリティ監査回数</td><td>4回（初回2体 + 修正後2体 + API検証1体）</td></tr>
     <tr><td>並列エージェント使用回数</td><td>5回（監査2回 + 修正1回 + 再監査1回 + ドキュメント1回）</td></tr>
     <tr><td>メインタブ数</td><td>8タブ</td></tr>
     <tr><td>サブタブ数</td><td>19サブタブ</td></tr>
-    <tr><td>Pythonモジュール数</td><td>12ファイル</td></tr>
+    <tr><td>Pythonモジュール数</td><td>16ファイル</td></tr>
     <tr><td>修正したカテゴリ分類パターン</td><td>50以上</td></tr>
+    <tr><td>実機検証した OS</td><td>macOS (Sequoia 含む) / Windows 10・11</td></tr>
   </table>
 </div>
 
@@ -451,8 +666,8 @@
 </div>
 
 <div class="footer">
-  🏠 家計管理ダッシュボード v2.0.1 開発ログ | 生成日: 2026-04-04<br>
-  このドキュメントは Claude Code (Opus 4.6) によって作成されました
+  🏠 家計管理ダッシュボード v2.5.1 開発ログ | 最終更新: 2026-04-18<br>
+  このドキュメントは Claude Code によって生成されています
 </div>
 
 </body>

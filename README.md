@@ -38,7 +38,8 @@ household-budget-app/
 │   ├── 家計アプリ起動.command        # ダブルクリック起動
 │   ├── はじめにお読みください.md      # 使い方の概要
 │   ├── 使い方ガイド.html             # 詳しい操作説明
-│   └── 開発ログ.html                # 開発の経緯
+│   ├── 開発ログ.html                # 開発の経緯
+│   └── Excelのデータ例.xlsx          # 取り込み用サンプルExcel
 ├── app.py                          # メインアプリ
 ├── requirements.txt                # 依存関係
 ├── config/
@@ -63,11 +64,7 @@ household-budget-app/
 │   ├── google_sheets_loader.py     # Google Sheets連携
 │   ├── monthly_importer.py         # 月別支出インポート
 │   └── gemini_utils.py             # Gemini APIリトライ
-└── templates/
-    ├── usage_guide.html            # 使い方ガイド
-    ├── development_log.html        # 開発ログ
-    ├── google_sheets_template.md   # Sheets連携ガイド
-    └── household_budget_template.xlsx
+└── VERSION
 ```
 
 ## タブ構成
