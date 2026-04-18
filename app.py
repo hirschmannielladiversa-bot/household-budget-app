@@ -257,19 +257,15 @@ def sidebar_receipt_reader() -> None:
         st.sidebar.caption("APIキーを入力してレシート読み取りを有効化")
         return
 
-    # 画像/PDFアップロード
+    # 画像アップロード（PDFはメインタブの「📷 画像・PDF読み取り」で対応）
     uploaded_image = st.sidebar.file_uploader(
-        "レシート画像またはPDFをアップロード",
-        type=["jpg", "jpeg", "png", "webp", "pdf"],
+        "レシート画像をアップロード",
+        type=["jpg", "jpeg", "png", "webp"],
         key="receipt_image"
     )
 
     if uploaded_image is not None:
-        # プレビュー（PDFは画像表示できないのでファイル名のみ）
-        if uploaded_image.name.lower().endswith(".pdf"):
-            st.sidebar.info(f"📄 {uploaded_image.name}")
-        else:
-            st.sidebar.image(uploaded_image, caption="アップロード画像", use_container_width=True)
+        st.sidebar.image(uploaded_image, caption="アップロード画像", use_container_width=True)
 
         # 読み取り実行ボタン
         if st.sidebar.button("🔍 読み取り実行"):
