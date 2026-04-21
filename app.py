@@ -709,10 +709,21 @@ def show_overview_tab(analyzer: BudgetAnalyzer, visualizer: BudgetVisualizer) ->
                 _income_data = {}
 
     def _overview_get_take_home(v):
+        """手取り = 第1口座 + 第2口座 + 第3口座 + 財形 を優先。
+        口座分配が未設定の古いデータは、格納された take_home + 財形 で代替。
+        PDF の差引支給額には財形が含まれないため、常に財形を加算する。
+        """
         if isinstance(v, (int, float)):
             return int(v)
         if isinstance(v, dict):
-            return v.get("take_home", 0)
+            acct = v.get("account_distribution", {}) or {}
+            a1 = int((acct.get("account_1") or {}).get("amount", 0))
+            a2 = int((acct.get("account_2") or {}).get("amount", 0))
+            a3 = int((acct.get("account_3") or {}).get("amount", 0))
+            zaikei = int(v.get("zaikei", 0))
+            if (a1 + a2 + a3) > 0:
+                return a1 + a2 + a3 + zaikei
+            return int(v.get("take_home", 0)) + zaikei
         return 0
 
     if selected_nendo != "全期間" and not df.empty and '日付' in df.columns:
@@ -1416,10 +1427,20 @@ def show_income_tab(analyzer: BudgetAnalyzer) -> None:
         return value
 
     def _get_take_home(value):
+        """手取り = 第1口座 + 第2口座 + 第3口座 + 財形 を優先。
+        口座分配が未設定の古いデータは take_home + 財形 にフォールバック。
+        """
         if isinstance(value, (int, float)):
             return int(value)
         if isinstance(value, dict):
-            return value.get("take_home", 0)
+            acct = value.get("account_distribution", {}) or {}
+            a1 = int((acct.get("account_1") or {}).get("amount", 0))
+            a2 = int((acct.get("account_2") or {}).get("amount", 0))
+            a3 = int((acct.get("account_3") or {}).get("amount", 0))
+            zaikei = int(value.get("zaikei", 0))
+            if (a1 + a2 + a3) > 0:
+                return a1 + a2 + a3 + zaikei
+            return int(value.get("take_home", 0)) + zaikei
         return 0
 
     if not analyzer.df.empty and '日付' in analyzer.df.columns:
@@ -1850,11 +1871,12 @@ def show_income_tab(analyzer: BudgetAnalyzer) -> None:
                             _r_a1 = int(r.get("account_1_amount", 0))
                             _r_a2 = int(r.get("account_2_amount", 0))
                             _r_zk = int(r.get("zaikei_general", 0)) + int(r.get("zaikei_pension", 0)) + int(r.get("zaikei_housing", 0))
-                            # 口座振込額が未記載の場合、手取り全額を第1口座に入れる
+                            # 口座振込額が未記載の場合、差引支給額を第1口座に入れる
+                            # （PDF の差引支給額は「a1+a2+a3」と一致。財形は含まれない）
                             if _r_a1 == 0 and _r_a2 == 0 and _r_take_home > 0:
                                 _r_a1 = _r_take_home
-                            # 手取り: take_home（差引支給額）を優先。なければ口座合計+財形で算出
-                            _r_hand = _r_take_home if _r_take_home > 0 else (_r_a1 + _r_a2 + _r_zk)
+                            # 手取り = 第1口座 + 第2口座 + 財形（常にこの定義で統一）
+                            _r_hand = _r_a1 + _r_a2 + _r_zk
                             edit_rows.append({
                                 "反映": True,
                                 "種別": type_label,
@@ -1871,7 +1893,7 @@ def show_income_tab(analyzer: BudgetAnalyzer) -> None:
                                 "第1口座": _r_a1,
                                 "第2口座": _r_a2,
                                 "財形": _r_zk,
-                                "手取り": _r_hand,
+                                "手取り": _r_hand,  # 第1口座+第2口座+財形。画面では disabled で自動再計算。
                             })
                         edit_df = pd.DataFrame(edit_rows)
                         edited = st.data_editor(
@@ -1892,7 +1914,7 @@ def show_income_tab(analyzer: BudgetAnalyzer) -> None:
                                 "第1口座": st.column_config.NumberColumn("第1口座", format="¥%d"),
                                 "第2口座": st.column_config.NumberColumn("第2口座", format="¥%d"),
                                 "財形": st.column_config.NumberColumn("財形", format="¥%d"),
-                                "手取り": st.column_config.NumberColumn("手取り", format="¥%d"),
+                                "手取り": st.column_config.NumberColumn("手取り", format="¥%d", disabled=True, help="第1口座+第2口座+財形 で自動計算"),
                             },
                             use_container_width=True,
                             hide_index=True,
@@ -1923,11 +1945,14 @@ def show_income_tab(analyzer: BudgetAnalyzer) -> None:
                                 acct1 = int(row.get("第1口座", 0))
                                 acct2 = int(row.get("第2口座", 0))
                                 zaikei_table = int(row.get("財形", 0))
-                                th = int(row["手取り"])
+                                # 手取り = 第1口座+第2口座+財形 で常に再計算
+                                # (data_editor の disabled 列は他列編集時に自動更新されないため保存時に強制再計算)
+                                th = acct1 + acct2 + zaikei_table
                                 if gross == 0 and (basic > 0 or allow > 0):
                                     gross = basic + allow
                                 total_ded = si + it + rt + od
                                 if th == 0 and gross > 0:
+                                    # 口座情報がない場合のフォールバック
                                     th = gross - total_ded
 
                                 # 対応するok_resultsを取得（振込情報+年末調整データ用）
@@ -2121,7 +2146,7 @@ def show_income_tab(analyzer: BudgetAnalyzer) -> None:
             a2_amount = int(a2.get("amount", 0))
             zaikei = int(entry_d.get("zaikei", 0))
             th = int(entry_d.get("take_home", 0))
-            # 口座分配データがない場合、手取りを第1口座に入れる
+            # 口座分配データがない場合、差引支給額を第1口座に入れる
             if a1_amount == 0 and a2_amount == 0 and zaikei == 0 and th > 0:
                 a1_amount = th
             edit_rows.append({
@@ -2137,7 +2162,8 @@ def show_income_tab(analyzer: BudgetAnalyzer) -> None:
                 "第1口座": a1_amount,
                 "第2口座": a2_amount,
                 "財形": zaikei,
-                "手取り": th if th > 0 else (a1_amount + a2_amount + zaikei),
+                # 手取り = 第1口座 + 第2口座 + 財形 で常に計算
+                "手取り": a1_amount + a2_amount + zaikei,
             })
             row_keys.append(key)
 
@@ -2162,7 +2188,7 @@ def show_income_tab(analyzer: BudgetAnalyzer) -> None:
                     "第1口座": st.column_config.NumberColumn("第1口座", format="¥%d", width="small"),
                     "第2口座": st.column_config.NumberColumn("第2口座", format="¥%d", width="small"),
                     "財形": st.column_config.NumberColumn("財形", format="¥%d", width="small"),
-                    "手取り": st.column_config.NumberColumn("手取り", format="¥%d", disabled=True, width="small"),
+                    "手取り": st.column_config.NumberColumn("手取り", format="¥%d", disabled=True, width="small", help="第1口座+第2口座+財形 で自動計算"),
                 },
                 use_container_width=True, hide_index=True, num_rows="dynamic",
                 key="_income_data_editor"
@@ -2560,19 +2586,22 @@ def show_advice_tab(analyzer: BudgetAnalyzer, advisor: FinancialAdvisor) -> None
         st.markdown("### 💬 AIファイナンシャルプランナー")
         st.caption("家計・資産・税金・保険・保険すべてを踏まえてアドバイスします。何でもご相談ください。")
 
-        # チャット履歴の初期化（保存データがあれば読み込み）
+        # チャット履歴の初期化: 起動時は UI を常に空にする。
+        # 過去の会話は JSON ファイルに保持され、「📂 履歴を読み込み」で復元可能。
+        # 要約 (history_summary.json) は別途 AI プロンプトに反映されるので、
+        # 会話の文脈は UI がクリアされても失われない。
         if "chat_history" not in st.session_state:
-            st.session_state.chat_history = FinancialAdvisor.load_chat_history()
-        if "chat_history_loaded" not in st.session_state:
-            st.session_state.chat_history_loaded = True
+            st.session_state.chat_history = []
 
-        # セッション開始時にサマリーがなければ履歴から自動生成
+        # セッション開始時にサマリーがなければ保存済み履歴から自動生成
         if "summary_initialized" not in st.session_state:
             st.session_state.summary_initialized = True
             summary = FinancialAdvisor.load_history_summary()
-            if not summary.get("key_insights") and st.session_state.chat_history:
-                with st.spinner("過去の会話履歴をサマリー化中..."):
-                    advisor.generate_history_summary(st.session_state.chat_history)
+            if not summary.get("key_insights"):
+                saved_history = FinancialAdvisor.load_chat_history()
+                if saved_history:
+                    with st.spinner("過去の会話履歴をサマリー化中..."):
+                        advisor.generate_history_summary(saved_history)
 
         # チャット履歴管理ボタン
         col1, col2, col3 = st.columns(3)

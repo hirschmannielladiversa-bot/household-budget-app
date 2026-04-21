@@ -7,10 +7,63 @@ import json
 import logging
 from pathlib import Path
 from dataclasses import dataclass, asdict
-from typing import Optional, Dict, Any, List
-from datetime import datetime
+from typing import Optional, Dict, Any, List, Tuple
+from datetime import datetime, date
 
 logger = logging.getLogger(__name__)
+
+
+def _get_current_date() -> Tuple[date, str]:
+    """AI プロンプトに埋め込む現在日付を取得する。
+
+    1. macOS のシステム時計を第一候補とする（NTP 同期済みが前提）。
+    2. システム時計が明らかに古い/ずれている場合のみ、
+       worldtimeapi.org から UTC を取得して JST に変換するフォールバックを試みる。
+
+    返り値: (date オブジェクト, 情報源ラベル)
+    """
+    today = datetime.now().date()
+    source = "system"
+
+    # worldtimeapi へ軽く当てて差分が 2 日以上あれば採用する。
+    # 通信失敗時は静かにシステム時計を信じる（ネット断でも動作させる）。
+    try:
+        import urllib.request
+        import json as _json
+        req = urllib.request.Request(
+            "https://worldtimeapi.org/api/timezone/Asia/Tokyo",
+            headers={"User-Agent": "household-budget-app/1.0"},
+        )
+        with urllib.request.urlopen(req, timeout=2.5) as resp:
+            data = _json.loads(resp.read().decode("utf-8"))
+        dt_str = data.get("datetime", "")  # 例: 2026-04-21T10:34:12.123456+09:00
+        if dt_str:
+            net_date = datetime.fromisoformat(dt_str).date()
+            if abs((net_date - today).days) >= 2:
+                logger.warning(
+                    "System clock differs from worldtimeapi by >=2 days: system=%s net=%s",
+                    today, net_date,
+                )
+                today, source = net_date, "worldtimeapi"
+    except Exception as _e:
+        # ネット未接続・タイムアウト等はシステム時計を継続使用
+        logger.debug("worldtimeapi fetch skipped: %s", _e)
+
+    return today, source
+
+
+def _build_date_header() -> str:
+    """AI プロンプトに先頭付与する日付ブロックを生成。"""
+    today, src = _get_current_date()
+    weekdays = ["月", "火", "水", "木", "金", "土", "日"]
+    wd = weekdays[today.weekday()]
+    src_note = "" if src == "system" else f"（{src} より取得）"
+    return (
+        f"【現在の日付（参考）】\n"
+        f"- 本日: {today.year}年{today.month}月{today.day}日（{wd}曜日）{src_note}\n"
+        f"- 回答内で日付や「現在」「今月」「先月」等の時間表現を使う場合は、必ずこの日付を基準としてください。\n"
+        f"- あなた自身の学習データ時点の日付を「現在」として扱わないでください。"
+    )
 
 import pandas as pd
 
@@ -624,8 +677,11 @@ class FinancialAdvisor:
             rule_based = self.generate_rule_based_advice()
 
         context = self._build_comprehensive_context()
+        date_header = _build_date_header()
 
-        user_prompt = f"""財務データを分析して、包括的なアドバイスをお願いします。
+        user_prompt = f"""{date_header}
+
+財務データを分析して、包括的なアドバイスをお願いします。
 
 {context}
 
@@ -679,8 +735,11 @@ Markdown形式で、見出しや箇条書きを使って読みやすくしてく
             rule_based = self.generate_rule_based_advice()
 
         context = self._build_comprehensive_context()
+        date_header = _build_date_header()
 
         prompt = f"""{self.SYSTEM_PROMPT}
+
+{date_header}
 
 財務データを分析して、包括的なアドバイスをお願いします。
 
@@ -781,7 +840,11 @@ Markdown形式で、見出しや箇条書きを使って読みやすくしてく
                 content = msg["content"][:200]
                 recent_chat += f"{role}: {content}\n"
 
+        date_header = _build_date_header()
+
         prompt = f"""{self.SYSTEM_PROMPT}
+
+{date_header}
 
 全財務データとこれまでの相談履歴を踏まえた、総合ファイナンシャルアドバイスを生成してください。
 
@@ -889,7 +952,11 @@ Markdown形式で、見出しや箇条書きを使って読みやすくしてく
         elif n_images > 1:
             image_instruction = f"※ 画像が{n_images}枚添付されています。全ての画像の内容を分析して回答に含めてください。レシートや明細書の場合は金額・日付・店舗名を抽出してください。"
 
+        date_header = _build_date_header()
+
         text_prompt = f"""{self.SYSTEM_PROMPT}
+
+{date_header}
 
 【財務状況】
 {context}
@@ -957,8 +1024,11 @@ Markdown形式で、見出しや箇条書きを使って読みやすくしてく
             return None
 
         context = self._build_comprehensive_context()
+        date_header = _build_date_header()
 
         system_prompt = f"""{self.SYSTEM_PROMPT}
+
+{date_header}
 
 【財務状況】
 {context}

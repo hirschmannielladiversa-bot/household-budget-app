@@ -3,6 +3,34 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 
+## [2.6.0] — 2026-04-21
+
+**手取り計算の統一 + AI プロンプトへの現在日付注入 + チャット履歴 UI 起動時クリア**
+
+### Fixed
+- 収入管理タブの「手取り」が PDF の差引支給額をそのまま表示していたため、
+  財形分が加算されず金額が不足する不具合を解消 (給与 / 賞与とも)。
+  - 「手取り = 第1口座 + 第2口座 + (第3口座) + 財形」の定義に統一
+  - `_get_take_home` / `_overview_get_take_home` ヘルパを口座分配+財形優先の計算に変更
+  - 古い JSON データ (take_home のみ格納) も自動で財形を加算して正しく集計
+  - PDF 取り込み時の `_r_hand` と収入一覧テーブルの表示、保存時の再計算を全て同じ式に統一
+- 収入編集テーブルの「手取り」列を `disabled=True` に変更し、他列編集時の整合性を保証
+
+### Added
+- AI アドバイス (Claude / Gemini) の全プロンプトに現在日付ヘッダーを自動注入
+  - `modules/advisor.py` に `_get_current_date()` / `_build_date_header()` を追加
+  - macOS / Windows のシステム時計を第一候補、`worldtimeapi.org` を 2.5 秒タイムアウトでフォールバック
+  - 2 日以上のずれを検出した場合のみ外部時刻を採用、ネット断でもシステム時計で動作継続
+  - これまで「2026年7月現在」等と AI が学習時点の日付をハルシネーションしていた問題を解消
+  - 5 メソッド (`chat` / `gemini_chat` / `generate_ai_advice` / `generate_gemini_advice` / `generate_comprehensive_advice`) 全てに適用
+
+### Changed
+- アドバイス画面の起動時にチャット履歴 UI を常に空で表示するよう変更
+  - `chat_history.json` は引き続きファイルとして保持、「📂 履歴を読み込み」ボタンで復元可能
+  - 会話要約 (`history_summary.json`) は別ファイルに保存され、起動のたびに AI プロンプトへ自動反映されるため、
+    UI 上の履歴がクリアされても文脈・過去の相談内容は失われない
+  - これまで起動時に初回セッションの古い質問が残り続けていた問題を解消
+
 ## [2.5.1] — 2026-04-18
 
 **Windows 実機検証 + カテゴリ追加 + 防御的型変換フィックス**
